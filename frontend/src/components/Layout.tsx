@@ -12,6 +12,8 @@ import {
   X,
   Link2,
   BarChart3,
+  DollarSign,
+  Repeat,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -21,6 +23,8 @@ const navItems = [
   { path: '/servicos', label: 'Serviços', icon: Scissors },
   { path: '/profissionais', label: 'Profissionais', icon: UserCog },
   { path: '/clientes', label: 'Clientes', icon: Users },
+  { path: '/recorrentes', label: 'Recorrentes', icon: Repeat },
+  { path: '/pagamentos', label: 'Pagamentos', icon: DollarSign },
   { path: '/relatorios', label: 'Relatórios', icon: BarChart3 },
   { path: '/configuracoes', label: 'Configurações', icon: Settings },
 ];

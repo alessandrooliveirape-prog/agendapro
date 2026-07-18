@@ -10,6 +10,8 @@ import ProfessionalsPage from './pages/ProfessionalsPage';
 import ClientsPage from './pages/ClientsPage';
 import SettingsPage from './pages/SettingsPage';
 import ReportsPage from './pages/ReportsPage';
+import PaymentsPage from './pages/PaymentsPage';
+import RecurringPage from './pages/RecurringPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -45,6 +47,8 @@ function AppRoutes() {
         <Route path="clientes" element={<ClientsPage />} />
         <Route path="configuracoes" element={<SettingsPage />} />
         <Route path="relatorios" element={<ReportsPage />} />
+        <Route path="pagamentos" element={<PaymentsPage />} />
+        <Route path="recorrentes" element={<RecurringPage />} />
       </Route>
     </Routes>
   );
