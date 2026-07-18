@@ -66,6 +66,41 @@ export default function LoginPage() {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    try {
+      // Simular dados do Google (em produção, usar Google OAuth SDK)
+      // Por enquanto, pedir email do Google
+      const googleEmail = prompt('Digite seu email do Google:');
+      if (!googleEmail) {
+        setLoading(false);
+        return;
+      }
+
+      const googleName = googleEmail.split('@')[0];
+
+      const result = await api.request<{ token: string; user: any; business: any; isNewUser: boolean }>('/auth/google', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: googleEmail,
+          name: googleName,
+          google_id: 'google_' + googleEmail,
+          avatar_url: null,
+        }),
+      });
+
+      // Salvar token
+      localStorage.setItem('agendapro_token', result.token);
+
+      toast.success(result.isNewUser ? 'Conta criada com sucesso!' : 'Login realizado!');
+      window.location.href = '/';
+    } catch (error: any) {
+      toast.error(error.message || 'Erro ao fazer login com Google');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       {/* Background */}
@@ -123,6 +158,30 @@ export default function LoginPage() {
                 ) : (
                   'Entrar'
                 )}
+              </button>
+
+              {/* Divisor */}
+              <div className="flex items-center gap-4 my-4">
+                <div class="flex-1 h-px bg-white/10"></div>
+                <span class="text-gray-500 text-sm">ou</span>
+                <div class="flex-1 h-px bg-white/10"></div>
+              </div>
+
+              {/* Botão Google */}
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white text-gray-900 rounded-xl font-medium hover:bg-gray-100 transition"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.03z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.68 1.06-2.86 0-5.29-1.93-6.16-4.53H3.82v2.84C5.55 21.47 8.48 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H3.82C3.16 8.43 2.82 9.94 2.82 11.5s.34 3.07.82 4.43l2.02-1.5z"/>
+                  <path fill="#34A853" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97.82 12 .82 8.48.82 5.55 2.37 3.82 4.87l2.02 1.56c.73-2.04 2.48-3.45 4.63-3.45z"/>
+                  <path fill="#EA4335" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.68 1.06-2.86 0-5.29-1.93-6.16-4.53H3.82v2.84C5.55 21.47 8.48 23 12 23z"/>
+                </svg>
+                Entrar com Google
               </button>
             </form>
           ) : (

@@ -13,7 +13,6 @@ const registerSchema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
   password: z.string().min(6),
-  phone: z.string().optional(),
 });
 
 const loginSchema = z.object({
@@ -101,14 +100,11 @@ router.post('/login', async (req, res) => {
     let validPassword = false;
 
     try {
-      // Tentar bcrypt primeiro
       validPassword = await bcrypt.compare(password, user.password_hash);
     } catch (e) {
-      // Se não for bcrypt, comparar como texto plano
       validPassword = password === user.password_hash;
     }
 
-    // Fallback: comparar como texto plano
     if (!validPassword) {
       validPassword = password === user.password_hash;
     }
@@ -128,6 +124,92 @@ router.post('/login', async (req, res) => {
         role: user.role,
       },
       business: user.businesses,
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: 'Dados inválidos', details: error.errors });
+    }
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Login com Google
+router.post('/google', async (req, res) => {
+  try {
+    const { email, name, google_id, avatar_url } = req.body;
+
+    if (!email || !google_id) {
+      return res.status(400).json({ error: 'Dados do Google incompletos' });
+    }
+
+    // Verificar se o usuário já existe
+    let { data: user } = await supabase
+      .from('users')
+      .select('*, businesses(id, name, slug, subscription_plan)')
+      .eq('email', email)
+      .single();
+
+    if (!user) {
+      // Criar novo usuário e negócio
+      const businessId = crypto.randomUUID();
+      const userId = crypto.randomUUID();
+      const slug = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-');
+
+      // Criar negócio
+      await supabase
+        .from('businesses')
+        .insert({
+          id: businessId,
+          name: name || 'Meu Negócio',
+          slug: slug + '-' + Date.now(),
+          owner_email: email,
+        });
+
+      // Criar usuário
+      const { error: userError } = await supabase
+        .from('users')
+        .insert({
+          id: userId,
+          business_id: businessId,
+          name: name,
+          email: email,
+          password_hash: 'google_oauth',
+          role: 'owner',
+          avatar_url: avatar_url,
+        });
+
+      if (userError) throw userError;
+
+      // Buscar dados do negócio
+      const { data: business } = await supabase
+        .from('businesses')
+        .select('id, name, slug, subscription_plan')
+        .eq('id', businessId)
+        .single();
+
+      const token = generateToken(userId, businessId);
+
+      return res.json({
+        token,
+        user: { id: userId, name, email, role: 'owner' },
+        business,
+        isNewUser: true,
+      });
+    }
+
+    // Usuário já existe - fazer login
+    const token = generateToken(user.id, user.business_id);
+
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+      business: user.businesses,
+      isNewUser: false,
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -165,7 +247,6 @@ router.post('/reset-password', async (req, res) => {
       return res.status(400).json({ error: 'Email é obrigatório' });
     }
 
-    // Verificar se o email existe
     const { data: user } = await supabase
       .from('users')
       .select('id, email')
@@ -173,28 +254,21 @@ router.post('/reset-password', async (req, res) => {
       .single();
 
     if (!user) {
-      // Por segurança, sempre retorna sucesso
       return res.json({ message: 'Se o email existir, instruções foram enviadas.' });
     }
 
-    // Gerar token de redefinição (válido por 1 hora)
     const resetToken = jwt.sign(
       { userId: user.id, type: 'reset' },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
-    // Gerar link de redefinição
     const frontendUrl = process.env.FRONTEND_URL || 'https://frontend-one-beta-vnz0jybrfj.vercel.app';
     const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
 
-    // Enviar email
     const { sendEmail, passwordResetEmail } = await import('../config/email.js');
     const emailContent = passwordResetEmail(email, resetUrl);
     await sendEmail(email, emailContent.subject, emailContent.html);
-
-    console.log(`Email de redefinição enviado para ${email}`);
-    console.log(`Link: ${resetUrl}`);
 
     res.json({ message: 'Se o email existir, instruções foram enviadas.' });
   } catch (error) {
@@ -217,10 +291,8 @@ router.post('/reset-password/confirm', async (req, res) => {
       return res.status(400).json({ error: 'Token inválido' });
     }
 
-    // Hash da nova senha
     const passwordHash = await bcrypt.hash(new_password, 10);
 
-    // Atualizar senha
     const { error } = await supabase
       .from('users')
       .update({ password_hash: passwordHash })
@@ -246,23 +318,19 @@ router.post('/change-password', authenticate, async (req, res) => {
       return res.status(400).json({ error: 'Senha atual e nova senha são obrigatórias' });
     }
 
-    // Buscar usuário
     const { data: user } = await supabase
       .from('users')
       .select('password_hash')
       .eq('id', req.userId)
       .single();
 
-    // Verificar senha atual
     const validPassword = await bcrypt.compare(current_password, user.password_hash);
     if (!validPassword) {
       return res.status(401).json({ error: 'Senha atual incorreta' });
     }
 
-    // Hash da nova senha
     const passwordHash = await bcrypt.hash(new_password, 10);
 
-    // Atualizar senha
     const { error } = await supabase
       .from('users')
       .update({ password_hash: passwordHash })
