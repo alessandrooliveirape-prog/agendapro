@@ -11,6 +11,9 @@ import { appointmentRoutes } from './routes/appointments.js';
 import { clientRoutes } from './routes/clients.js';
 import { publicRoutes } from './routes/public.js';
 import { webhookRoutes } from './routes/webhooks.js';
+import { paymentRoutes } from './routes/payments.js';
+import { recurringRoutes } from './routes/recurring.js';
+import { reportRoutes } from './routes/reports.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -34,6 +37,9 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/webhooks', webhookRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/recurring', recurringRoutes);
+app.use('/api/reports', reportRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {
