@@ -2,7 +2,7 @@ services:
   - type: web
     name: agendapro-backend
     runtime: node
-    buildCommand: npm install
+    buildCommand: npm install --ignore-scripts
     startCommand: node src/server.js
     envVars:
       - key: NODE_ENV
