@@ -16,6 +16,7 @@ import {
   DollarSign,
   Repeat,
   Crown,
+  History,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -27,6 +28,7 @@ const navItems = [
   { path: '/clientes', label: 'Clientes', icon: Users },
   { path: '/recorrentes', label: 'Recorrentes', icon: Repeat },
   { path: '/pagamentos', label: 'Pagamentos', icon: DollarSign },
+  { path: '/historico-pagamentos', label: 'Histórico', icon: History },
   { path: '/relatorios', label: 'Relatórios', icon: BarChart3 },
   { path: '/planos', label: 'Planos', icon: Crown },
   { path: '/configuracoes', label: 'Configurações', icon: Settings },

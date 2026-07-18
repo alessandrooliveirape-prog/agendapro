@@ -225,6 +225,61 @@ router.post('/webhook/stripe', async (req, res) => {
   }
 });
 
+// Histórico de pagamentos
+router.get('/history', authenticate, async (req, res) => {
+  try {
+    // Buscar pagamentos de agendamentos
+    const { data: appointments } = await supabase
+      .from('appointments')
+      .select('id, client_name, service_name, date, price, payment_status, payment_method, created_at')
+      .eq('business_id', req.businessId)
+      .eq('payment_status', 'paid')
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    // Buscar histórico de assinaturas (do Supabase ou API Mercado Pago)
+    const { data: business } = await supabase
+      .from('businesses')
+      .select('subscription_plan, subscription_expires_at, payment_settings')
+      .eq('id', req.businessId)
+      .single();
+
+    // Se tiver Mercado Pago configurado, buscar pagamentos via API
+    let mpPayments = [];
+    const mpToken = business?.payment_settings?.mercadopago_access_token;
+    if (mpToken) {
+      try {
+        const response = await fetch('https://api.mercadopago.com/v1/payments/search?sort=date_created&criteria=desc&limit=50', {
+          headers: { 'Authorization': `Bearer ${mpToken}` },
+        });
+        const mpData = await response.json();
+        mpPayments = mpData.results || [];
+      } catch (e) {
+        console.log('Erro ao buscar pagamentos MP:', e.message);
+      }
+    }
+
+    res.json({
+      subscription: {
+        plan: business?.subscription_plan,
+        expires_at: business?.subscription_expires_at,
+      },
+      appointment_payments: appointments || [],
+      mercadopago_payments: mpPayments.map(p => ({
+        id: p.id,
+        status: p.status,
+        status_detail: p.status_detail,
+        amount: p.transaction_amount,
+        description: p.description,
+        date: p.date_created,
+        payment_method: p.payment_method_id,
+      })),
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Enviar mensagem de cobrança via WhatsApp
 router.post('/send-link', authenticate, async (req, res) => {
   try {
