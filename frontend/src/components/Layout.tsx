@@ -34,6 +34,10 @@ const navItems = [
   { path: '/configuracoes', label: 'Configurações', icon: Settings },
 ];
 
+const adminItems = [
+  { path: '/admin', label: 'Admin', icon: Shield },
+];
+
 export default function Layout() {
   const { user, business, logout } = useAuth();
   const { subscription } = useSubscription();
@@ -97,6 +101,29 @@ export default function Layout() {
               <span className="text-sm">{label}</span>
             </NavLink>
           ))}
+          {/* Admin items */}
+          {user?.role === 'admin' && (
+            <>
+              <div className="border-t border-white/10 my-2"></div>
+              {adminItems.map(({ path, label, icon: Icon }) => (
+                <NavLink
+                  key={path}
+                  to={path}
+                  onClick={() => setSidebarOpen(false)}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                      isActive
+                        ? 'bg-purple-500/20 text-purple-400'
+                        : 'text-purple-400 hover:text-purple-300 hover:bg-purple-500/10'
+                    }`
+                  }
+                >
+                  <Icon size={20} />
+                  <span className="text-sm">{label}</span>
+                </NavLink>
+              ))}
+            </>
+          )}
         </nav>
 
         {/* Subscription Status */}

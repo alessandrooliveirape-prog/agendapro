@@ -15,6 +15,7 @@ import PaymentsPage from './pages/PaymentsPage';
 import RecurringPage from './pages/RecurringPage';
 import PricingPage from './pages/PricingPage';
 import PaymentHistoryPage from './pages/PaymentHistoryPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -54,6 +55,7 @@ function AppRoutes() {
         <Route path="recorrentes" element={<RecurringPage />} />
         <Route path="planos" element={<PricingPage />} />
         <Route path="historico-pagamentos" element={<PaymentHistoryPage />} />
+        <Route path="admin" element={<AdminDashboardPage />} />
       </Route>
     </Routes>
   );

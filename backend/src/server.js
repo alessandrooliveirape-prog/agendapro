@@ -16,6 +16,7 @@ import { recurringRoutes } from './routes/recurring.js';
 import { reportRoutes } from './routes/reports.js';
 import { subscriptionRoutes } from './routes/subscriptions.js';
 import { pixRoutes } from './routes/pix.js';
+import { adminRoutes } from './routes/admin.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -44,6 +45,7 @@ app.use('/api/recurring', recurringRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/pix', pixRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {
