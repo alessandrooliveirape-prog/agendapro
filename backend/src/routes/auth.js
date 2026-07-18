@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import { supabase } from '../config/database.js';
 import { generateToken, authenticate } from '../middleware/auth.js';
