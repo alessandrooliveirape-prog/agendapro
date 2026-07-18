@@ -37,9 +37,13 @@ export default function RecurringPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const payload = {
+        ...formData,
+        professional_id: formData.professional_id || undefined,
+      };
       const result = await api.request('/recurring', {
         method: 'POST',
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
       toast.success(result.message || 'Agendamentos recorrentes criados!');
       setShowModal(false);
