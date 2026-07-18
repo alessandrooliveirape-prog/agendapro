@@ -263,17 +263,24 @@ export default function AgendaPage() {
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
                 <label className="block text-sm text-gray-400 mb-2">Serviço</label>
-                <select
-                  value={formData.service_id}
-                  onChange={e => setFormData({ ...formData, service_id: e.target.value })}
-                  className="input"
-                  required
-                >
-                  <option value="">Selecione...</option>
-                  {services.map(s => (
-                    <option key={s.id} value={s.id}>{s.name} — R${s.price}</option>
-                  ))}
-                </select>
+                {services.length > 0 ? (
+                  <select
+                    value={formData.service_id}
+                    onChange={e => setFormData({ ...formData, service_id: e.target.value })}
+                    className="input"
+                    required
+                  >
+                    <option value="">Selecione...</option>
+                    {services.map(s => (
+                      <option key={s.id} value={s.id}>{s.name} — R${s.price}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-yellow-400 text-sm">
+                    Nenhum serviço cadastrado.{' '}
+                    <a href="/servicos" className="underline font-medium">Cadastre um serviço</a> primeiro.
+                  </div>
+                )}
               </div>
 
               {professionals.length > 0 && (
