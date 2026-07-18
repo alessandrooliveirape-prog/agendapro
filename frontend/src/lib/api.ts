@@ -1,4 +1,4 @@
-const API_BASE = 'https://agendapro-backend-w1fp.onrender.com/api';
+const API_BASE = 'https://backend-five-gamma-27.vercel.app/api';
 
 class ApiClient {
   private token: string | null = null;
