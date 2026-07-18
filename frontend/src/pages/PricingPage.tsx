@@ -62,17 +62,29 @@ const plans = [
 export default function PricingPage() {
   const { subscription, refresh } = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
+  const [pixModal, setPixModal] = useState<{ key: string; amount: number; plan: string } | null>(null);
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
 
   const handleUpgrade = async (planId: string) => {
     setLoading(planId);
     try {
-      const result = await api.request<{ payment_url?: string; provider?: string; message?: string }>('/subscriptions/checkout', {
+      const result = await api.request<{ payment_url?: string; provider?: string; pix_key?: string; amount?: number; plan?: string; message?: string }>('/subscriptions/checkout', {
         method: 'POST',
         body: JSON.stringify({ plan: planId }),
       });
 
       if (result.payment_url) {
         window.location.href = result.payment_url;
+      } else if (result.pix_key) {
+        const plan = plans.find(p => p.id === planId);
+        setPixModal({
+          key: result.pix_key,
+          amount: result.amount || plan?.price || 0,
+          plan: result.plan || plan?.name || '',
+        });
+        // Gerar QR Code
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=pix:${result.pix_key}?amount=${result.amount || plan?.price || 0}`;
+        setQrCodeUrl(qrUrl);
       } else {
         toast(result.message || 'Configure um gateway de pagamento em Configurações > Pagamentos', {
           icon: '💳',
@@ -83,6 +95,13 @@ export default function PricingPage() {
       toast.error(error.message);
     } finally {
       setLoading(null);
+    }
+  };
+
+  const copyPixKey = () => {
+    if (pixModal) {
+      navigator.clipboard.writeText(pixModal.key);
+      toast.success('Chave PIX copiada!');
     }
   };
 
@@ -186,6 +205,48 @@ export default function PricingPage() {
           </div>
         </div>
       </div>
+
+      {/* PIX QR Code Modal */}
+      {pixModal && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+          <div className="glass rounded-2xl w-full max-w-sm p-6 text-center">
+            <h2 className="text-xl font-semibold mb-2">Pagamento via PIX</h2>
+            <p className="text-gray-400 text-sm mb-6">Plano {pixModal.plan} — R${pixModal.amount}</p>
+
+            {qrCodeUrl && (
+              <div className="mb-6">
+                <img src={qrCodeUrl} alt="QR Code PIX" className="mx-auto rounded-xl" />
+              </div>
+            )}
+
+            <div className="mb-4">
+              <p className="text-gray-400 text-xs mb-2">Chave PIX (CPF):</p>
+              <div className="flex items-center gap-2 justify-center">
+                <span className="text-lg font-mono font-bold">{pixModal.key}</span>
+                <button onClick={copyPixKey} className="p-2 hover:bg-white/10 rounded-lg transition">
+                  <span className="text-gray-400">📋</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="mb-6 p-4 bg-white/5 rounded-xl">
+              <p className="text-gray-400 text-xs mb-1">Valor:</p>
+              <p className="text-2xl font-bold gradient-text">R${pixModal.amount}</p>
+            </div>
+
+            <p className="text-gray-500 text-xs mb-4">
+              Após pagar, envie o comprovante pelo WhatsApp ou aguarde a confirmação automática.
+            </p>
+
+            <button
+              onClick={() => setPixModal(null)}
+              className="w-full py-3 rounded-xl bg-white/10 text-white font-medium hover:bg-white/20 transition"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
