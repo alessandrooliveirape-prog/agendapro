@@ -45,6 +45,7 @@ export default function AgendaPage() {
     client_phone: '',
     date: format(new Date(), 'yyyy-MM-dd'),
     time: '09:00',
+    notes: '',
   });
 
   useEffect(() => {
@@ -94,6 +95,7 @@ export default function AgendaPage() {
         client_phone: '',
         date: format(selectedDate, 'yyyy-MM-dd'),
         time: '09:00',
+        notes: '',
       });
       loadData();
     } catch (error: any) {
@@ -334,6 +336,17 @@ export default function AgendaPage() {
                     required
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Observações</label>
+                <textarea
+                  value={formData.notes}
+                  onChange={e => setFormData({ ...formData, notes: e.target.value })}
+                  placeholder="O que o cliente precisa? Ex: Corte específico, alergias, preferências..."
+                  className="input min-h-[80px] resize-none"
+                  rows={3}
+                />
               </div>
 
               <div className="flex gap-3 pt-4">
