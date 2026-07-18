@@ -154,15 +154,54 @@ router.post('/create-stripe', authenticate, async (req, res) => {
 router.post('/webhook/mercadopago', async (req, res) => {
   try {
     const { type, data } = req.body;
+    console.log('Mercado Pago webhook:', type, data);
 
     if (type === 'payment') {
-      const appointment_id = data.id;
-      // Verificar pagamento via API
-      // Atualizar status no banco
+      // Buscar detalhes do pagamento
+      const paymentId = data.id;
+
+      // Buscar business_id do external_reference
+      const { data: payment } = await supabase
+        .from('appointments')
+        .select('business_id, id')
+        .eq('id', paymentId)
+        .single();
+
+      if (payment) {
+        // Atualizar status do pagamento
+        await supabase
+          .from('appointments')
+          .update({ payment_status: 'paid', payment_method: 'mercadopago' })
+          .eq('id', paymentId);
+      }
+    }
+
+    // Webhook de assinatura (upgrade)
+    if (type === 'payment' && req.body.external_reference?.startsWith('sub_')) {
+      const [, businessId, plan] = req.body.external_reference.split('_');
+      const paymentStatus = req.body.status;
+
+      if (paymentStatus === 'approved') {
+        // Ativar plano
+        const planInfo = { basic: 30, pro: 30, business: 30 };
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + (planInfo[plan] || 30));
+
+        await supabase
+          .from('businesses')
+          .update({
+            subscription_plan: plan,
+            subscription_expires_at: expiresAt.toISOString(),
+          })
+          .eq('id', businessId);
+
+        console.log(`Plano ${plan} ativado para ${businessId}`);
+      }
     }
 
     res.status(200).send('OK');
   } catch (error) {
+    console.error('Erro no webhook:', error);
     res.status(200).send('OK');
   }
 });
