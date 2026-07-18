@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import Layout from './components/Layout';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
@@ -12,6 +13,7 @@ import SettingsPage from './pages/SettingsPage';
 import ReportsPage from './pages/ReportsPage';
 import PaymentsPage from './pages/PaymentsPage';
 import RecurringPage from './pages/RecurringPage';
+import PricingPage from './pages/PricingPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -49,6 +51,7 @@ function AppRoutes() {
         <Route path="relatorios" element={<ReportsPage />} />
         <Route path="pagamentos" element={<PaymentsPage />} />
         <Route path="recorrentes" element={<RecurringPage />} />
+        <Route path="planos" element={<PricingPage />} />
       </Route>
     </Routes>
   );
@@ -58,17 +61,19 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            style: {
-              background: '#1f2937',
-              color: '#fff',
-              borderRadius: '12px',
-            },
-          }}
-        />
-        <AppRoutes />
+        <SubscriptionProvider>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              style: {
+                background: '#1f2937',
+                color: '#fff',
+                borderRadius: '12px',
+              },
+            }}
+          />
+          <AppRoutes />
+        </SubscriptionProvider>
       </AuthProvider>
     </BrowserRouter>
   );

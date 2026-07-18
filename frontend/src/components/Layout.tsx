@@ -1,5 +1,6 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useSubscription } from '../contexts/SubscriptionContext';
 import {
   LayoutDashboard,
   Calendar,
@@ -14,6 +15,7 @@ import {
   BarChart3,
   DollarSign,
   Repeat,
+  Crown,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -26,11 +28,13 @@ const navItems = [
   { path: '/recorrentes', label: 'Recorrentes', icon: Repeat },
   { path: '/pagamentos', label: 'Pagamentos', icon: DollarSign },
   { path: '/relatorios', label: 'Relatórios', icon: BarChart3 },
+  { path: '/planos', label: 'Planos', icon: Crown },
   { path: '/configuracoes', label: 'Configurações', icon: Settings },
 ];
 
 export default function Layout() {
   const { user, business, logout } = useAuth();
+  const { subscription } = useSubscription();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -92,6 +96,45 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
+
+        {/* Subscription Status */}
+        {subscription && (
+          <div className="p-4 border-t border-white/10">
+            <div className={`p-4 rounded-xl mb-3 ${
+              subscription.is_trial
+                ? 'bg-green-500/10 border border-green-500/30'
+                : subscription.plan === 'free'
+                ? 'bg-yellow-500/10 border border-yellow-500/30'
+                : 'bg-indigo-500/10 border border-indigo-500/30'
+            }`}>
+              <div className="flex items-center gap-2 mb-1">
+                <Crown size={16} className={
+                  subscription.is_trial ? 'text-green-400' :
+                  subscription.plan === 'free' ? 'text-yellow-400' : 'text-indigo-400'
+                } />
+                <span className="text-sm font-medium">
+                  {subscription.is_trial ? 'Teste Grátis' : subscription.plan_name}
+                </span>
+              </div>
+              {subscription.is_trial && (
+                <p className="text-xs text-green-400">{subscription.days_left} dias restantes</p>
+              )}
+              {subscription.is_expired && (
+                <p className="text-xs text-red-400">Expirado</p>
+              )}
+            </div>
+            {(subscription.plan === 'free' || subscription.is_expired) && (
+              <NavLink
+                to="/planos"
+                onClick={() => setSidebarOpen(false)}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-400 hover:text-purple-300 transition-colors"
+              >
+                <Crown size={20} />
+                <span className="text-sm font-medium">Fazer Upgrade</span>
+              </NavLink>
+            )}
+          </div>
+        )}
 
         {/* Business info */}
         <div className="p-4 border-t border-white/10">

@@ -14,6 +14,7 @@ import { webhookRoutes } from './routes/webhooks.js';
 import { paymentRoutes } from './routes/payments.js';
 import { recurringRoutes } from './routes/recurring.js';
 import { reportRoutes } from './routes/reports.js';
+import { subscriptionRoutes } from './routes/subscriptions.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -40,6 +41,7 @@ app.use('/api/webhooks', webhookRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/recurring', recurringRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {
