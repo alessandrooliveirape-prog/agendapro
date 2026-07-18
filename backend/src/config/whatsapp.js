@@ -1,34 +1,37 @@
 const whatsappConfig = {
-  apiUrl: process.env.WHATSAPP_API_URL,
-  instanceId: process.env.WHATSAPP_INSTANCE_ID,
-  token: process.env.WHATSAPP_TOKEN,
+  apiUrl: process.env.WHATSAPP_API_URL || 'http://144.33.22.54:8080',
+  instanceId: process.env.WHATSAPP_INSTANCE_ID || 'agendapro',
+  apiKey: process.env.WHATSAPP_API_KEY || 'agendapro2026',
 };
 
 export async function sendWhatsAppMessage(phone, message) {
-  if (!whatsappConfig.apiUrl || !whatsappConfig.token) {
-    console.log('⚠️ WhatsApp não configurado. Mensagem não enviada.');
-    console.log(`📱 Para: ${phone}`);
-    console.log(`💬 Mensagem: ${message}`);
+  if (!whatsappConfig.apiUrl || !whatsappConfig.apiKey) {
+    console.log('WhatsApp não configurado. Mensagem nao enviada.');
+    console.log(`Para: ${phone}`);
+    console.log(`Mensagem: ${message}`);
     return { sent: false, reason: 'not_configured' };
   }
 
   try {
+    const phoneClean = phone.replace(/\D/g, '');
+
     const response = await fetch(
-      `${whatsappConfig.apiUrl}/instance/${whatsappConfig.instanceId}/send-text`,
+      `${whatsappConfig.apiUrl}/message/sendText/${whatsappConfig.instanceId}`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${whatsappConfig.token}`,
+          'apikey': whatsappConfig.apiKey,
         },
         body: JSON.stringify({
-          phone: phone.replace(/\D/g, ''),
-          message,
+          number: phoneClean,
+          text: message,
         }),
       }
     );
 
     const data = await response.json();
+    console.log(`WhatsApp enviado para ${phone}: ${data.key?.id || 'ok'}`);
     return { sent: true, data };
   } catch (error) {
     console.error('Erro ao enviar WhatsApp:', error.message);
