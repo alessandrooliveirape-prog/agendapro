@@ -72,13 +72,10 @@ export default function AgendaPage() {
     }
   };
 
-  // Carregar serviços quando o modal abre
+  // Carregar dados quando o modal abre
   useEffect(() => {
-    if (showModal && services.length === 0) {
-      api.getServices().then(svcs => {
-        console.log('Serviços modal:', svcs);
-        setServices(svcs || []);
-      }).catch(console.error);
+    if (showModal) {
+      loadData();
     }
   }, [showModal]);
 
