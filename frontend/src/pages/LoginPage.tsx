@@ -241,16 +241,25 @@ export default function LoginPage() {
           )}
 
           <div className="mt-6 pt-6 border-t border-white/10 text-center text-sm text-gray-400">
-            {mode === 'login' ? (
+            {mode === 'login' && (
               <>
                 Não tem conta?{' '}
                 <button onClick={() => setMode('register')} className="text-indigo-400 hover:text-indigo-300">
                   Criar agora
                 </button>
               </>
-            ) : (
+            )}
+            {mode === 'register' && (
               <>
                 Já tem conta?{' '}
+                <button onClick={() => setMode('login')} className="text-indigo-400 hover:text-indigo-300">
+                  Fazer login
+                </button>
+              </>
+            )}
+            {mode === 'reset' && (
+              <>
+                Lembrou a senha?{' '}
                 <button onClick={() => setMode('login')} className="text-indigo-400 hover:text-indigo-300">
                   Fazer login
                 </button>
