@@ -4,9 +4,8 @@ import { supabase } from '../config/database.js';
 import { authenticate } from '../middleware/auth.js';
 
 const router = Router();
-router.use(authenticate);
 
-// Planos disponíveis
+// Planos disponíveis (público)
 const PLANS = {
   free: {
     name: 'Teste Grátis',
@@ -32,7 +31,7 @@ const PLANS = {
     duration_days: 30,
     max_services: 50,
     max_professionals: 5,
-    max_appointments_month: -1, // ilimitado
+    max_appointments_month: -1,
     features: ['Tudo do Básico', 'Até 50 serviços', 'Até 5 profissionais', 'Agendamentos ilimitados', 'Pagamento online', 'Relatórios'],
   },
   business: {
@@ -46,17 +45,13 @@ const PLANS = {
   },
 };
 
-// Listar planos
-router.get('/plans', async (req, res) => {
-  try {
-    res.json(PLANS);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+// Listar planos (público)
+router.get('/plans', (req, res) => {
+  res.json(PLANS);
 });
 
-// Obter assinatura atual
-router.get('/current', async (req, res) => {
+// Obter assinatura atual (requer auth)
+router.get('/current', authenticate, async (req, res) => {
   try {
     const { data: business } = await supabase
       .from('businesses')
@@ -80,7 +75,7 @@ router.get('/current', async (req, res) => {
     const plan = PLANS[business.subscription_plan] || PLANS.free;
 
     res.json({
-      plan: business.subscription_plan,
+      plan: business.subscription_plan || 'free',
       plan_name: plan.name,
       is_trial: isTrial,
       is_expired: isExpired,
@@ -99,14 +94,18 @@ router.get('/current', async (req, res) => {
   }
 });
 
-// Verificar se pode usar funcionalidade
-router.get('/check-limit/:feature', async (req, res) => {
+// Verificar se pode usar funcionalidade (requer auth)
+router.get('/check-limit/:feature', authenticate, async (req, res) => {
   try {
     const { data: business } = await supabase
       .from('businesses')
       .select('subscription_plan, subscription_expires_at, created_at')
       .eq('id', req.businessId)
       .single();
+
+    if (!business) {
+      return res.status(404).json({ error: 'Negócio não encontrado' });
+    }
 
     const now = new Date();
     const createdAt = new Date(business.created_at);
@@ -123,7 +122,6 @@ router.get('/check-limit/:feature', async (req, res) => {
     const plan = PLANS[business.subscription_plan] || PLANS.free;
     const feature = req.params.feature;
 
-    // Verificar limites
     if (feature === 'services' && plan.max_services !== -1) {
       const { count } = await supabase
         .from('services')
@@ -154,8 +152,8 @@ router.get('/check-limit/:feature', async (req, res) => {
   }
 });
 
-// Atualizar plano (simulado - em produção integraria com gateway de pagamento)
-router.post('/upgrade', async (req, res) => {
+// Atualizar plano (requer auth)
+router.post('/upgrade', authenticate, async (req, res) => {
   try {
     const { plan } = z.object({ plan: z.enum(['basic', 'pro', 'business']) }).parse(req.body);
 
