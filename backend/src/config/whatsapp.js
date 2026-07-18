@@ -1,5 +1,5 @@
 const whatsappConfig = {
-  apiUrl: process.env.WHATSAPP_API_URL || 'http://144.33.22.54:8080',
+  apiUrl: process.env.WHATSAPP_API_URL || 'http://144.33.22.54:8081',
   instanceId: process.env.WHATSAPP_INSTANCE_ID || 'agendapro',
   apiKey: process.env.WHATSAPP_API_KEY || 'agendapro2026',
 };
