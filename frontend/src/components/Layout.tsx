@@ -17,6 +17,7 @@ import {
   Repeat,
   Crown,
   History,
+  Shield,
 } from 'lucide-react';
 import { useState } from 'react';
 
