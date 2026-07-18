@@ -105,6 +105,19 @@ export default function PricingPage() {
     }
   };
 
+  const handleCancel = async () => {
+    if (!confirm('Tem certeza que deseja cancelar sua assinatura? Você manterá o acesso até o fim do período pago.')) {
+      return;
+    }
+    try {
+      await api.request('/subscriptions/cancel', { method: 'POST' });
+      toast.success('Assinatura cancelada!');
+      await refresh();
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="text-center mb-12">
@@ -115,6 +128,19 @@ export default function PricingPage() {
         {subscription?.is_trial && (
           <div className="inline-block mt-4 px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-full text-green-400 text-sm">
             Você está no teste grátis — {subscription.days_left} dias restantes
+          </div>
+        )}
+        {subscription?.plan !== 'free' && !subscription?.is_expired && (
+          <div className="mt-4 flex items-center justify-center gap-4">
+            <span className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/30 rounded-full text-indigo-400 text-sm">
+              Plano {subscription.plan_name} ativo
+            </span>
+            <button
+              onClick={handleCancel}
+              className="text-sm text-gray-400 hover:text-red-400 transition underline"
+            >
+              Cancelar assinatura
+            </button>
           </div>
         )}
       </div>

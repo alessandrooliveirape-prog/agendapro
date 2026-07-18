@@ -264,6 +264,30 @@ router.post('/checkout', authenticate, async (req, res) => {
   }
 });
 
+// Cancelar assinatura (requer auth)
+router.post('/cancel', authenticate, async (req, res) => {
+  try {
+    const { data: business, error } = await supabase
+      .from('businesses')
+      .update({
+        subscription_plan: 'free',
+        subscription_expires_at: null,
+      })
+      .eq('id', req.businessId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      message: 'Assinatura cancelada. Você ainda tem acesso até o fim do período pago.',
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Ativar plano após pagamento confirmado (usado por webhooks)
 router.post('/activate', async (req, res) => {
   try {
