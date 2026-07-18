@@ -15,6 +15,7 @@ import { paymentRoutes } from './routes/payments.js';
 import { recurringRoutes } from './routes/recurring.js';
 import { reportRoutes } from './routes/reports.js';
 import { subscriptionRoutes } from './routes/subscriptions.js';
+import { pixRoutes } from './routes/pix.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -42,6 +43,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/recurring', recurringRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/pix', pixRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {
