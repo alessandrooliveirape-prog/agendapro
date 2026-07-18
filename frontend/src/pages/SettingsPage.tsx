@@ -199,7 +199,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Horário de funcionamento */}
-      <div className="glass rounded-2xl p-6">
+      <div className="glass rounded-2xl p-6 mb-6">
         <h2 className="text-lg font-semibold mb-4">Horário de Funcionamento</h2>
         <div className="space-y-3">
           {Object.entries(days).map(([key, label]) => {
@@ -237,6 +237,103 @@ export default function SettingsPage() {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Pagamentos Online */}
+      <div className="glass rounded-2xl p-6">
+        <h2 className="text-lg font-semibold mb-4">Pagamentos Online</h2>
+        <p className="text-gray-400 text-sm mb-6">
+          Configure uma das opções abaixo para que seus clientes possam pagar online.
+          O dinheiro vai direto para sua conta.
+        </p>
+
+        {/* Stripe */}
+        <div className="p-4 bg-white/5 rounded-xl mb-4">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-lg bg-indigo-500/20 flex items-center justify-center">
+              <span className="text-indigo-400 font-bold">S</span>
+            </div>
+            <div>
+              <h3 className="font-medium">Stripe</h3>
+              <p className="text-gray-400 text-xs">Aceita cartão de crédito e débito</p>
+            </div>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Chave Pública (Publishable Key)</label>
+              <input
+                type="text"
+                placeholder="pk_live_..."
+                className="input"
+                id="stripe_public"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Chave Secreta (Secret Key)</label>
+              <input
+                type="password"
+                placeholder="sk_live_..."
+                className="input"
+                id="stripe_secret"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Mercado Pago */}
+        <div className="p-4 bg-white/5 rounded-xl mb-4">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+              <span className="text-yellow-400 font-bold">M</span>
+            </div>
+            <div>
+              <h3 className="font-medium">Mercado Pago</h3>
+              <p className="text-gray-400 text-xs">Pix, cartão e boleto - mais popular no Brasil</p>
+            </div>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Access Token</label>
+              <input
+                type="password"
+                placeholder="APP_USR-..."
+                className="input"
+                id="mp_token"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-400 mb-2">Public Key</label>
+              <input
+                type="text"
+                placeholder="APP_USR-..."
+                className="input"
+                id="mp_public"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* PIX */}
+        <div className="p-4 bg-white/5 rounded-xl">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+              <span className="text-green-400 font-bold">P</span>
+            </div>
+            <div>
+              <h3 className="font-medium">PIX (Gratuito)</h3>
+              <p className="text-gray-400 text-xs">Para quem não tem empresa - apenas chave PIX</p>
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm text-gray-400 mb-2">Chave PIX (email, CPF ou telefone)</label>
+            <input
+              type="text"
+              placeholder="seu@email.com"
+              className="input"
+              id="pix_key"
+            />
+          </div>
         </div>
       </div>
     </div>

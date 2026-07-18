@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
-import { DollarSign, CreditCard, CheckCircle, Clock, Send, Copy } from 'lucide-react';
+import { DollarSign, CreditCard, CheckCircle, Clock, Send, ExternalLink, Copy } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface Appointment {
@@ -14,13 +14,13 @@ interface Appointment {
   payment_status: string;
   payment_method: string;
   status: string;
-  notes: string;
 }
 
 export default function PaymentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'paid'>('all');
+  const [generating, setGenerating] = useState<string | null>(null);
 
   useEffect(() => {
     loadAppointments();
@@ -37,31 +37,81 @@ export default function PaymentsPage() {
     }
   };
 
-  const handlePayment = async (appointmentId: string, amount: number) => {
+  // Criar pagamento via Mercado Pago
+  const handleMercadoPago = async (apt: Appointment) => {
+    setGenerating(apt.id);
+    try {
+      const result = await api.request('/payments/create-mercadopago', {
+        method: 'POST',
+        body: JSON.stringify({
+          appointment_id: apt.id,
+          title: apt.service_name,
+          amount: apt.price,
+          payer_email: apt.client_phone.replace(/\D/g, '') + '@email.com',
+        }),
+      });
+      if (result.init_point) {
+        window.open(result.init_point, '_blank');
+        toast.success('Link de pagamento gerado!');
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setGenerating(null);
+    }
+  };
+
+  // Criar pagamento via Stripe
+  const handleStripe = async (apt: Appointment) => {
+    setGenerating(apt.id);
+    try {
+      const result = await api.request('/payments/create-stripe', {
+        method: 'POST',
+        body: JSON.stringify({
+          appointment_id: apt.id,
+          amount: apt.price,
+          description: apt.service_name,
+        }),
+      });
+      if (result.url) {
+        window.open(result.url, '_blank');
+        toast.success('Link de pagamento gerado!');
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setGenerating(null);
+    }
+  };
+
+  // Confirmar pagamento manual (PIX)
+  const handleManualPayment = async (apt: Appointment) => {
     try {
       await api.request('/payments/create-checkout', {
         method: 'POST',
         body: JSON.stringify({
-          appointment_id: appointmentId,
-          amount: amount,
-          description: 'Pagamento via PIX'
+          appointment_id: apt.id,
+          amount: apt.price,
+          description: 'PIX confirmado'
         }),
       });
-      toast.success('Pagamento registrado!');
+      toast.success('Pagamento confirmado!');
       loadAppointments();
     } catch (error: any) {
       toast.error(error.message);
     }
   };
 
-  const sendPaymentLink = async (phone: string, amount: number, service: string) => {
-    const message = `Olá! Você tem um pagamento pendente de R$${amount} pelo serviço: ${service}. PIX: agendapro@email.com. Confirme o pagamento respondendo este mensagem.`;
+  // Enviar cobrança via WhatsApp
+  const sendPaymentLink = async (apt: Appointment) => {
+    const pixKey = 'seu@email.com'; // Buscar das configurações
+    const message = `Olá ${apt.client_name}! 👋\n\nSeu agendamento: *${apt.service_name}*\nData: ${apt.date} às ${apt.time}\nValor: *R$${apt.price}*\n\nPara pagar, envie o PIX para:\n📧 ${pixKey}\n\nApós o pagamento, envie o comprovante por aqui. 😊`;
     try {
       await api.request('/payments/send-link', {
         method: 'POST',
-        body: JSON.stringify({ phone, message }),
+        body: JSON.stringify({ phone: apt.client_phone, message }),
       });
-      toast.success('Mensagem enviada!');
+      toast.success('Mensagem de cobrança enviada!');
     } catch (error: any) {
       toast.error(error.message);
     }
@@ -131,28 +181,13 @@ export default function PaymentsPage() {
 
       {/* Filtros */}
       <div className="flex gap-3 mb-6">
-        <button
-          onClick={() => setFilter('all')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-            filter === 'all' ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white'
-          }`}
-        >
+        <button onClick={() => setFilter('all')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${filter === 'all' ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white'}`}>
           Todos
         </button>
-        <button
-          onClick={() => setFilter('pending')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-            filter === 'pending' ? 'bg-yellow-500/20 text-yellow-400' : 'text-gray-400 hover:text-white'
-          }`}
-        >
+        <button onClick={() => setFilter('pending')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${filter === 'pending' ? 'bg-yellow-500/20 text-yellow-400' : 'text-gray-400 hover:text-white'}`}>
           Pendentes
         </button>
-        <button
-          onClick={() => setFilter('paid')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-            filter === 'paid' ? 'bg-green-500/20 text-green-400' : 'text-gray-400 hover:text-white'
-          }`}
-        >
+        <button onClick={() => setFilter('paid')} className={`px-4 py-2 rounded-lg text-sm font-medium transition ${filter === 'paid' ? 'bg-green-500/20 text-green-400' : 'text-gray-400 hover:text-white'}`}>
           Pagos
         </button>
       </div>
@@ -186,27 +221,39 @@ export default function PaymentsPage() {
                   R$ {apt.price}
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   {apt.payment_status === 'pending' ? (
                     <>
                       <button
-                        onClick={() => handlePayment(apt.id, apt.price)}
-                        className="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg text-sm font-medium hover:bg-green-500/30 transition flex items-center gap-2"
+                        onClick={() => handleMercadoPago(apt)}
+                        disabled={generating === apt.id}
+                        className="px-3 py-2 bg-yellow-500/20 text-yellow-400 rounded-lg text-xs font-medium hover:bg-yellow-500/30 transition flex items-center gap-1"
                       >
-                        <CreditCard size={16} />
-                        Confirmar
+                        {generating === apt.id ? '...' : 'Mercado Pago'}
                       </button>
                       <button
-                        onClick={() => sendPaymentLink(apt.client_phone, apt.price, apt.service_name)}
-                        className="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-lg text-sm font-medium hover:bg-purple-500/30 transition flex items-center gap-2"
+                        onClick={() => handleStripe(apt)}
+                        disabled={generating === apt.id}
+                        className="px-3 py-2 bg-indigo-500/20 text-indigo-400 rounded-lg text-xs font-medium hover:bg-indigo-500/30 transition flex items-center gap-1"
                       >
-                        <Send size={16} />
-                        Cobrar
+                        {generating === apt.id ? '...' : 'Stripe'}
+                      </button>
+                      <button
+                        onClick={() => sendPaymentLink(apt)}
+                        className="px-3 py-2 bg-green-500/20 text-green-400 rounded-lg text-xs font-medium hover:bg-green-500/30 transition flex items-center gap-1"
+                      >
+                        <Send size={12} /> PIX
+                      </button>
+                      <button
+                        onClick={() => handleManualPayment(apt)}
+                        className="px-3 py-2 bg-white/10 text-white rounded-lg text-xs font-medium hover:bg-white/20 transition"
+                      >
+                        Confirmar
                       </button>
                     </>
                   ) : (
-                    <span className="px-4 py-2 bg-green-500/10 text-green-400 rounded-lg text-sm">
-                      Pago
+                    <span className="px-3 py-2 bg-green-500/10 text-green-400 rounded-lg text-xs">
+                      Pago ✓
                     </span>
                   )}
                 </div>
@@ -216,21 +263,21 @@ export default function PaymentsPage() {
         )}
       </div>
 
-      {/* Info PIX */}
+      {/* Instruções */}
       <div className="mt-6 glass rounded-2xl p-6">
-        <h3 className="font-semibold mb-3">Como funciona o pagamento</h3>
-        <div className="grid md:grid-cols-3 gap-4 text-sm text-gray-400">
-          <div className="flex items-start gap-3">
-            <span className="text-purple-400">1.</span>
-            <span>Cliente agenda e vê o valor total</span>
+        <h3 className="font-semibold mb-3">Como receber pagamentos</h3>
+        <div className="grid md:grid-cols-3 gap-6 text-sm text-gray-400">
+          <div>
+            <h4 className="font-medium text-white mb-2">Mercado Pago</h4>
+            <p>Crie conta em mercadopago.com.br, pegue o Access Token e configure em Configurações. O cliente paga via Pix ou cartão.</p>
           </div>
-          <div className="flex items-start gap-3">
-            <span className="text-purple-400">2.</span>
-            <span>Clique em "Cobrar" para enviar mensagem com dados do PIX</span>
+          <div>
+            <h4 className="font-medium text-white mb-2">Stripe</h4>
+            <p>Crie conta em stripe.com, pegue as API keys e configure. Aceita cartão internacional.</p>
           </div>
-          <div className="flex items-start gap-3">
-            <span className="text-purple-400">3.</span>
-            <span>Após confirmação, clique em "Confirmar" para marcar como pago</span>
+          <div>
+            <h4 className="font-medium text-white mb-2">PIX Direto</h4>
+            <p>Coloque sua chave PIX e envie a cobrança pelo WhatsApp. Cliente paga e envia comprovante.</p>
           </div>
         </div>
       </div>
