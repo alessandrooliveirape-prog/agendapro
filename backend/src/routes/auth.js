@@ -155,4 +155,116 @@ router.get('/me', authenticate, async (req, res) => {
   }
 });
 
+// Solicitar redefinição de senha
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email é obrigatório' });
+    }
+
+    // Verificar se o email existe
+    const { data: user } = await supabase
+      .from('users')
+      .select('id, email')
+      .eq('email', email)
+      .single();
+
+    if (!user) {
+      // Por segurança, sempre retorna sucesso
+      return res.json({ message: 'Se o email existir, instruções foram enviadas.' });
+    }
+
+    // Gerar token de redefinição (válido por 1 hora)
+    const resetToken = jwt.sign(
+      { userId: user.id, type: 'reset' },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    // Em produção, enviar email com o link
+    // Por agora, apenas logamos
+    console.log(`Token de redefinição para ${email}: ${resetToken}`);
+
+    res.json({ message: 'Se o email existir, instruções foram enviadas.' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Redefinir senha com token
+router.post('/reset-password/confirm', async (req, res) => {
+  try {
+    const { token, new_password } = req.body;
+
+    if (!token || !new_password) {
+      return res.status(400).json({ error: 'Token e nova senha são obrigatórios' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decoded.type !== 'reset') {
+      return res.status(400).json({ error: 'Token inválido' });
+    }
+
+    // Hash da nova senha
+    const passwordHash = await bcrypt.hash(new_password, 10);
+
+    // Atualizar senha
+    const { error } = await supabase
+      .from('users')
+      .update({ password_hash: passwordHash })
+      .eq('id', decoded.userId);
+
+    if (error) throw error;
+
+    res.json({ message: 'Senha redefinida com sucesso!' });
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(400).json({ error: 'Token expirado. Solicite uma nova redefinição.' });
+    }
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Alterar senha (usuário logado)
+router.post('/change-password', authenticate, async (req, res) => {
+  try {
+    const { current_password, new_password } = req.body;
+
+    if (!current_password || !new_password) {
+      return res.status(400).json({ error: 'Senha atual e nova senha são obrigatórias' });
+    }
+
+    // Buscar usuário
+    const { data: user } = await supabase
+      .from('users')
+      .select('password_hash')
+      .eq('id', req.userId)
+      .single();
+
+    // Verificar senha atual
+    const validPassword = await bcrypt.compare(current_password, user.password_hash);
+    if (!validPassword) {
+      return res.status(401).json({ error: 'Senha atual incorreta' });
+    }
+
+    // Hash da nova senha
+    const passwordHash = await bcrypt.hash(new_password, 10);
+
+    // Atualizar senha
+    const { error } = await supabase
+      .from('users')
+      .update({ password_hash: passwordHash })
+      .eq('id', req.userId);
+
+    if (error) throw error;
+
+    res.json({ message: 'Senha alterada com sucesso!' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export { router as authRoutes };

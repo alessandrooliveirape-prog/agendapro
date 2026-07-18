@@ -336,6 +336,104 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* Alterar Senha */}
+      <div className="glass rounded-2xl p-6">
+        <h2 className="text-lg font-semibold mb-4">Alterar Senha</h2>
+        <p className="text-gray-400 text-sm mb-6">Mantenha sua conta segura com uma senha forte.</p>
+        <ChangePasswordForm />
+      </div>
     </div>
+  );
+}
+
+function ChangePasswordForm() {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (newPassword !== confirmPassword) {
+      toast.error('As senhas não coincidem');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast.error('A senha deve ter pelo menos 6 caracteres');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await api.request('/auth/change-password', {
+        method: 'POST',
+        body: JSON.stringify({
+          current_password: currentPassword,
+          new_password: newPassword,
+        }),
+      });
+      toast.success('Senha alterada com sucesso!');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error: any) {
+      toast.error(error.message || 'Erro ao alterar senha');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
+      <div>
+        <label className="block text-sm text-gray-400 mb-2">Senha Atual</label>
+        <input
+          type="password"
+          value={currentPassword}
+          onChange={e => setCurrentPassword(e.target.value)}
+          placeholder="••••••"
+          className="input"
+          required
+        />
+      </div>
+      <div>
+        <label className="block text-sm text-gray-400 mb-2">Nova Senha</label>
+        <input
+          type="password"
+          value={newPassword}
+          onChange={e => setNewPassword(e.target.value)}
+          placeholder="Mínimo 6 caracteres"
+          className="input"
+          minLength={6}
+          required
+        />
+      </div>
+      <div>
+        <label className="block text-sm text-gray-400 mb-2">Confirmar Nova Senha</label>
+        <input
+          type="password"
+          value={confirmPassword}
+          onChange={e => setConfirmPassword(e.target.value)}
+          placeholder="Repita a nova senha"
+          className="input"
+          minLength={6}
+          required
+        />
+      </div>
+      <button
+        type="submit"
+        disabled={loading}
+        className="btn btn-primary"
+      >
+        {loading ? (
+          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+        ) : (
+          'Alterar Senha'
+        )}
+      </button>
+    </form>
   );
 }

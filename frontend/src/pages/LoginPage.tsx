@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 
 export default function LoginPage() {
   const { login } = useAuth();
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [mode, setMode] = useState<'login' | 'register' | 'reset'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -44,6 +44,23 @@ export default function LoginPage() {
       await login(email, password);
     } catch (error: any) {
       toast.error(error.message || 'Erro ao criar conta');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await api.request('/auth/reset-password', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      });
+      toast.success('Instruções enviadas para seu email!');
+      setMode('login');
+    } catch (error: any) {
+      toast.error(error.message || 'Erro ao enviar instruções');
     } finally {
       setLoading(false);
     }
@@ -191,6 +208,38 @@ export default function LoginPage() {
             </form>
           )}
 
+          {/* Reset Password Form */}
+          {mode === 'reset' && (
+            <form onSubmit={handleResetPassword} className="space-y-5">
+              <p className="text-gray-400 text-sm mb-4">
+                Informe seu email para receber instruções de redefinição de senha.
+              </p>
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  className="input"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn btn-primary w-full py-3 text-base"
+              >
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  'Enviar Instruções'
+                )}
+              </button>
+            </form>
+          )}
+
           <div className="mt-6 pt-6 border-t border-white/10 text-center text-sm text-gray-400">
             {mode === 'login' ? (
               <>
@@ -210,12 +259,15 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Demo credentials */}
+        {/* Esqueci minha senha */}
         {mode === 'login' && (
-          <div className="mt-4 p-4 glass rounded-xl text-sm text-gray-400">
-            <p className="font-medium text-gray-300 mb-2">Conta de teste:</p>
-            <p>Email: ze@barbearia.com</p>
-            <p>Senha: 123456</p>
+          <div className="mt-4 text-center">
+            <button
+              onClick={() => setMode('reset')}
+              className="text-sm text-gray-400 hover:text-indigo-400 transition"
+            >
+              Esqueci minha senha
+            </button>
           </div>
         )}
       </div>
