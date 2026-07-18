@@ -96,16 +96,20 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Email ou senha incorretos' });
     }
 
-    // Mock mode: aceita senha direta ou bcrypt
-    const isMock = !process.env.SUPABASE_URL || process.env.SUPABASE_URL.includes('seu-projeto');
+    // Verificar senha (bcrypt ou texto plano)
     let validPassword = false;
 
-    if (isMock) {
-      // Mock: compara senha direta
-      validPassword = password === user.password_hash;
-    } else {
-      // Produção: bcrypt compare
+    try {
+      // Tentar bcrypt primeiro
       validPassword = await bcrypt.compare(password, user.password_hash);
+    } catch (e) {
+      // Se não for bcrypt, comparar como texto plano
+      validPassword = password === user.password_hash;
+    }
+
+    // Fallback: comparar como texto plano
+    if (!validPassword) {
+      validPassword = password === user.password_hash;
     }
 
     if (!validPassword) {
