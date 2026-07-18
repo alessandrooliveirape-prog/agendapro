@@ -60,15 +60,26 @@ export default function AgendaPage() {
         api.getServices(),
         api.getProfessionals(),
       ]);
+      console.log('Serviços carregados:', svcs);
       setAppointments(apts);
-      setServices(svcs);
-      setProfessionals(profs);
+      setServices(svcs || []);
+      setProfessionals(profs || []);
     } catch (error) {
-      console.error(error);
+      console.error('Erro ao carregar dados:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  // Carregar serviços quando o modal abre
+  useEffect(() => {
+    if (showModal && services.length === 0) {
+      api.getServices().then(svcs => {
+        console.log('Serviços modal:', svcs);
+        setServices(svcs || []);
+      }).catch(console.error);
+    }
+  }, [showModal]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
