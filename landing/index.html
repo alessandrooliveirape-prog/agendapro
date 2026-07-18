@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgendaPro — Sistema de Agendamento para Profissionais</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%); }
+        .gradient-text { background: linear-gradient(135deg, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(99,102,241,0.2); }
+        html { scroll-behavior: smooth; }
+    </style>
+</head>
+<body class="bg-gray-950 text-white">
+
+    <!-- Nav -->
+    <nav class="fixed top-0 w-full z-50 bg-gray-950/80 backdrop-blur-lg border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-xl font-bold">Agenda<span class="gradient-text">Pro</span></a>
+            <div class="hidden md:flex gap-8 text-sm text-gray-400">
+                <a href="#funcionalidades" class="hover:text-white transition">Funcionalidades</a>
+                <a href="#precos" class="hover:text-white transition">Preços</a>
+                <a href="#depoimentos" class="hover:text-white transition">Depoimentos</a>
+            </div>
+            <div class="flex gap-3">
+                <a href="#precos" class="px-5 py-2 rounded-full font-medium text-sm hover:text-white text-gray-300 transition">Preços</a>
+                <a href="#cadastro" class="gradient-bg px-5 py-2 rounded-full font-medium text-sm hover:opacity-90 transition">Começar Grátis</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="min-h-screen flex items-center pt-20">
+        <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
+            <div>
+                <div class="inline-block px-4 py-2 glass rounded-full text-sm text-purple-400 mb-6">
+                    Novo: Agendamento via WhatsApp automático
+                </div>
+                <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+                    Seus clientes agendam <span class="gradient-text">sozinhos</span>, 24h por dia
+                </h1>
+                <p class="text-gray-400 text-lg mb-8 max-w-lg">
+                    Pare de perder tempo respondendo mensagem por mensagem. Com o AgendaPro, seus clientes 
+                    agendam pelo site, Instagram ou WhatsApp — e você só aparece na hora certa.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="#cadastro" class="gradient-bg px-8 py-4 rounded-full font-bold text-center hover:opacity-90 transition">
+                        Testar 14 Dias Grátis
+                    </a>
+                    <a href="#funcionalidades" class="border border-white/30 px-8 py-4 rounded-full font-medium text-center hover:bg-white/10 transition">
+                        Ver Funcionalidades
+                    </a>
+                </div>
+                <div class="flex gap-6 mt-10 text-sm text-gray-400">
+                    <span>✅ 14 dias grátis</span>
+                    <span>✅ Sem cartão</span>
+                    <span>✅ Cancele quando quiser</span>
+                </div>
+            </div>
+            <div class="relative">
+                <!-- Phone Mockup -->
+                <div class="w-72 mx-auto bg-gray-900 rounded-[3rem] p-3 border-4 border-gray-800 shadow-2xl">
+                    <div class="bg-white rounded-[2rem] overflow-hidden">
+                        <div class="gradient-bg p-4 text-center">
+                            <div class="text-white font-semibold text-sm">Barbearia do Zé</div>
+                            <div class="text-white/70 text-xs">Agende seu horário</div>
+                        </div>
+                        <div class="p-4 space-y-3">
+                            <div class="bg-gray-50 rounded-xl p-3">
+                                <div class="text-gray-800 font-medium text-sm">Corte masculino</div>
+                                <div class="text-gray-500 text-xs">30 min — R$45</div>
+                            </div>
+                            <div class="bg-gray-50 rounded-xl p-3">
+                                <div class="text-gray-800 font-medium text-sm">Barba</div>
+                                <div class="text-gray-500 text-xs">20 min — R$30</div>
+                            </div>
+                            <div class="bg-gray-50 rounded-xl p-3">
+                                <div class="text-gray-800 font-medium text-sm">Corte + Barba</div>
+                                <div class="text-gray-500 text-xs">45 min — R$65</div>
+                            </div>
+                            <div class="gradient-bg rounded-xl p-3 text-center text-white font-medium text-sm">
+                                Escolher Horário
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Logos -->
+    <section class="py-12 border-y border-white/10">
+        <div class="max-w-6xl mx-auto px-6 text-center">
+            <p class="text-gray-500 text-sm mb-6">Confiado por +500 profissionais em todo o Brasil</p>
+            <div class="flex justify-center gap-12 flex-wrap text-gray-500 text-sm font-medium">
+                <span>Barbearias</span>
+                <span>Clínicas</span>
+                <span>Salões</span>
+                <span>Personal Trainers</span>
+                <span>Estúdios</span>
+                <span>Consultórios</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problema -->
+    <section class="py-24">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Você perde tempo com isso?</h2>
+                <p class="text-gray-400 text-lg">Se identifica com alguma dessas situações:</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="flex gap-4 p-6 glass rounded-2xl">
+                    <span class="text-2xl">📱</span>
+                    <div>
+                        <h3 class="font-semibold mb-1">Várias conversas no WhatsApp</h3>
+                        <p class="text-gray-400 text-sm">Responde "qual horário disponível?" 50 vezes por dia.</p>
+                    </div>
+                </div>
+                <div class="flex gap-4 p-6 glass rounded-2xl">
+                    <span class="text-2xl">😤</span>
+                    <div>
+                        <h3 class="font-semibold mb-1">Faltas e desmarcas</h3>
+                        <p class="text-gray-400 text-sm">Cliente marca e não aparece. Horário perdido = dinheiro perdido.</p>
+                    </div>
+                </div>
+                <div class="flex gap-4 p-6 glass rounded-2xl">
+                    <span class="text-2xl">📝</span>
+                    <div>
+                        <h3 class="font-semibold mb-1">Controle no caderno</h3>
+                        <p class="text-gray-400 text-sm">Agenda física que ninguém vê. Horários duplicados. Caos total.</p>
+                    </div>
+                </div>
+                <div class="flex gap-4 p-6 glass rounded-2xl">
+                    <span class="text-2xl">💤</span>
+                    <div>
+                        <h3 class="font-semibold mb-1">Perde clientes no horário comercial</h3>
+                        <p class="text-gray-400 text-sm">Cliente quer agendar às 22h. Você só responde amanhã. Ele vai pro concorrente.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solução -->
+    <section class="py-24 bg-gray-900/50">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">AgendaPro resolve tudo isso</h2>
+                <p class="text-gray-400 text-lg">Um sistema que trabalha enquanto você dorme.</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="p-8 glass rounded-2xl card-hover text-center">
+                    <div class="text-5xl mb-4">🌐</div>
+                    <h3 class="text-xl font-semibold mb-3">Página de Agendamento</h3>
+                    <p class="text-gray-400">Link personalizado (agendapro.com/seu-nome) que seus clientes acessam para agendar sozinhos.</p>
+                </div>
+                <div class="p-8 glass rounded-2xl card-hover text-center">
+                    <div class="text-5xl mb-4">💬</div>
+                    <h3 class="text-xl font-semibold mb-3">WhatsApp Automático</h3>
+                    <p class="text-gray-400">Cliente agenda e já recebe confirmação no WhatsApp. Lembrete automático antes do horário.</p>
+                </div>
+                <div class="p-8 glass rounded-2xl card-hover text-center">
+                    <div class="text-5xl mb-4">📊</div>
+                    <h3 class="text-xl font-semibold mb-3">Dashboard Completo</h3>
+                    <p class="text-gray-400">Veja sua agenda do dia, semana e mês. Faturamento, ocupação e clientes em tempo real.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Funcionalidades -->
+    <section id="funcionalidades" class="py-24">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Tudo que você precisa</h2>
+                <p class="text-gray-400 text-lg">Funcionalidades que profissionais reais pediram.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="p-6 glass rounded-xl">
+                    <div class="text-3xl mb-3">📅</div>
+                    <h3 class="font-semibold mb-2">Agenda Inteligente</h3>
+                    <p class="text-gray-400 text-sm">Bloqueie horários, defina intervalos, aceite reagendamentos.</p>
+                </div>
+                <div class="p-6 glass rounded-xl">
+                    <div class="text-3xl mb-3">🔔</div>
+                    <h3 class="font-semibold mb-2">Lembretes Automáticos</h3>
+                    <p class="text-gray-400 text-sm">WhatsApp e SMS 24h e 1h antes. Reduz faltas em até 70%.</p>
+                </div>
+                <div class="p-6 glass rounded-xl">
+                    <div class="text-3xl mb-3">💰</div>
+                    <h3 class="font-semibold mb-2">Pagamento Online</h3>
+                    <p class="text-gray-400 text-sm">Pix, cartão ou dinheiro. cliente paga no ato ou antecipado.</p>
+                </div>
+                <div class="p-6 glass rounded-xl">
+                    <div class="text-3xl mb-3">👥</div>
+                    <h3 class="font-semibold mb-2">Cadastro de Clientes</h3>
+                    <p class="text-gray-400 text-sm">Histórico completo: agendamentos, gastos, observações.</p>
+                </div>
+                <div class="p-6 glass rounded-xl">
+                    <div class="text-3xl mb-3">📱</div>
+                    <h3 class="font-semibold mb-2">App no Celular</h3>
+                    <p class="text-gray-400 text-sm">Funciona como app no celular (PWA). Sem precisar publicar na Play Store.</p>
+                </div>
+                <div class="p-6 glass rounded-xl">
+                    <div class="text-3xl mb-3">🔗</div>
+                    <h3 class="font-semibold mb-2">Integrações</h3>
+                    <p class="text-gray-400 text-sm">Google Calendar, Instagram Bio, Linktree, QR Code.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demonstração -->
+    <section class="py-24 bg-gray-900/50">
+        <div class="max-w-5xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Veja como funciona</h2>
+                <p class="text-gray-400 text-lg">Do cadastro ao primeiro agendamento em 5 minutos.</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="w-16 h-16 rounded-full gradient-bg flex items-center justify-center mx-auto mb-4 text-2xl font-bold">1</div>
+                    <h3 class="font-semibold mb-2">Cadastre seu negócio</h3>
+                    <p class="text-gray-400 text-sm">Nome, serviços, preços e horários. Leva 5 minutos.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 rounded-full gradient-bg flex items-center justify-center mx-auto mb-4 text-2xl font-bold">2</div>
+                    <h3 class="font-semibold mb-2">Compartilhe o link</h3>
+                    <p class="text-gray-400 text-sm">Coloque no Instagram, WhatsApp ou site. Pronto.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 rounded-full gradient-bg flex items-center justify-center mx-auto mb-4 text-2xl font-bold">3</div>
+                    <h3 class="font-semibold mb-2">Clientes agendam sozinhos</h3>
+                    <p class="text-gray-400 text-sm">Você só aparece na hora certa. Sem mensagens.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Depoimentos -->
+    <section id="depoimentos" class="py-24">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Quem usa, recomenda</h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="p-6 glass rounded-2xl">
+                    <div class="flex gap-1 text-yellow-400 mb-4">★★★★★</div>
+                    <p class="text-gray-300 mb-6">"Reduzi 80% das mensagens no WhatsApp. Meus clientes adoram agendar pelo link. Virou essencial."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full gradient-bg"></div>
+                        <div>
+                            <div class="font-medium text-sm">Marcos Oliveira</div>
+                            <div class="text-gray-500 text-xs">Barbeiro — São Paulo</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 glass rounded-2xl">
+                    <div class="flex gap-1 text-yellow-400 mb-4">★★★★★</div>
+                    <p class="text-gray-300 mb-6">"Faltas caíram 70% com os lembretes automáticos. Antes eu perdia R$2.000/mês em horários perdidos."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-rose-500"></div>
+                        <div>
+                            <div class="font-medium text-sm">Camila Santos</div>
+                            <div class="text-gray-500 text-xs">Cabeleireira — RJ</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 glass rounded-2xl">
+                    <div class="flex gap-1 text-yellow-400 mb-4">★★★★★</div>
+                    <p class="text-gray-300 mb-6">"Passei de 20 para 40 atendimentos por semana. O sistema paga sozinho em 1 dia."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-500"></div>
+                        <div>
+                            <div class="font-medium text-sm">Rafael Lima</div>
+                            <div class="text-gray-500 text-xs">Personal Trainer — BH</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Preços -->
+    <section id="precos" class="py-24 bg-gray-900/50">
+        <div class="max-w-5xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Escolha seu plano</h2>
+                <p class="text-gray-400 text-lg">Comece grátis. Cancele quando quiser.</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Plano Básico -->
+                <div class="glass rounded-2xl p-8 card-hover">
+                    <div class="text-gray-400 text-sm font-medium mb-2">Básico</div>
+                    <div class="text-4xl font-bold mb-1">R$49<span class="text-lg text-gray-400">/mês</span></div>
+                    <p class="text-gray-500 text-sm mb-6">Para quem está começando</p>
+                    <ul class="space-y-3 mb-8 text-sm">
+                        <li class="flex gap-2"><span class="text-green-400">✓</span> 1 profissional</li>
+                        <li class="flex gap-2"><span class="text-green-400">✓</span> Agendamento online</li>
+                        <li class="flex gap-2"><span class="text-green-400">✓</span> Lembretes por SMS</li>
+                        <li class="flex gap-2"><span class="text-green-400">✓</span> Link personalizado</li>
+                        <li class="flex gap-2 text-gray-500"><span>✗</span> WhatsApp automático</li>
+                        <li class="flex gap-2 text-gray-500"><span>✗</span> Pagamento online</li>
+                    </ul>
+                    <button class="w-full border border-white/20 py-3 rounded-xl font-medium hover:bg-white/10 transition">
+                        Começar Grátis
+                    </button>
+                </div>
+
+                <!-- Plano Pro -->
+                <div class="gradient-bg rounded-2xl p-8 card-hover relative">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-gray-900 px-4 py-1 rounded-full text-xs font-bold">
+                        MAIS POPULAR
+                    </div>
+                    <div class="text-white/80 text-sm font-medium mb-2">Pro</div>
+                    <div class="text-4xl font-bold mb-1">R$99<span class="text-lg text-white/60">/mês</span></div>
+                    <p class="text-white/60 text-sm mb-6">Para profissionais que querem crescer</p>
+                    <ul class="space-y-3 mb-8 text-sm">
+                        <li class="flex gap-2"><span class="text-white">✓</span> Até 5 profissionais</li>
+                        <li class="flex gap-2"><span class="text-white">✓</span> Agendamento online</li>
+                        <li class="flex gap-2"><span class="text-white">✓</span> Lembretes WhatsApp</li>
+                        <li class="flex gap-2"><span class="text-white">✓</span> Link personalizado</li>
+                        <li class="flex gap-2"><span class="text-white">✓</span> WhatsApp automático</li>
+                        <li class="flex gap-2"><span class="text-white">✓</span> Pagamento online</li>
+                    </ul>
+                    <button class="w-full bg-white text-purple-600 py-3 rounded-xl font-bold hover:bg-gray-100 transition">
+                        Testar 14 Dias Grátis
+                    </button>
+                </div>
+
+                <!-- Plano Business -->
+                <div class="glass rounded-2xl p-8 card-hover">
+                    <div class="text-gray-400 text-sm font-medium mb-2">Business</div>
+                    <div class="text-4xl font-bold mb-1">R$199<span class="text-lg text-gray-400">/mês</span></div>
+                    <p class="text-gray-500 text-sm mb-6">Para salões e clínicas</p>
+                    <ul class="space-y-3 mb-8 text-sm">
+                        <li class="flex gap-2"><span class="text-green-400">✓</span> Profissionais ilimitados</li>
+                        <li class="flex gap-2"><span class="text-green-400">✓</span> Tudo do plano Pro</li>
+                        <li class="flex gap-2"><span class="text-green-400">✓</span> Múltiplas unidades</li>
+                        <li class="flex gap-2"><span class="text-green-400">✓</span> Relatórios avançados</li>
+                        <li class="flex gap-2"><span class="text-green-400">✓</span> API de integração</li>
+                        <li class="flex gap-2"><span class="text-green-400">✓</span> Suporte prioritário</li>
+                    </ul>
+                    <button class="w-full border border-white/20 py-3 rounded-xl font-medium hover:bg-white/10 transition">
+                        Falar com Vendas
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-24">
+        <div class="max-w-3xl mx-auto px-6">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-16">Perguntas Frequentes</h2>
+            <div class="space-y-4">
+                <details class="glass rounded-xl overflow-hidden">
+                    <summary class="p-6 cursor-pointer font-semibold">Preciso saber programar?</summary>
+                    <p class="px-6 pb-6 text-gray-400">Não! O AgendaPro é pronto. Você só cadastra seus serviços e horários. Em 5 minutos está funcionando.</p>
+                </details>
+                <details class="glass rounded-xl overflow-hidden">
+                    <summary class="p-6 cursor-pointer font-semibold">Funciona no celular?</summary>
+                    <p class="px-6 pb-6 text-gray-400">Sim! Tanto o painel quanto a página de agendamento dos clientes funcionam perfeitamente no celular.</p>
+                </details>
+                <details class="glass rounded-xl overflow-hidden">
+                    <summary class="p-6 cursor-pointer font-semibold">Posso cancelar quando quiser?</summary>
+                    <p class="px-6 pb-6 text-gray-400">Sim. Sem fidelidade. Cancele a qualquer momento pelo painel. Seus dados ficam disponíveis por 30 dias.</p>
+                </details>
+                <details class="glass rounded-xl overflow-hidden">
+                    <summary class="p-6 cursor-pointer font-semibold">Como funciona o pagamento online?</summary>
+                    <p class="px-6 pb-6 text-gray-400">Integramos com Stripe, Mercado Pago e PagSeguro. O cliente paga Pix ou cartão no momento do agendamento.</p>
+                </details>
+                <details class="glass rounded-xl overflow-hidden">
+                    <summary class="p-6 cursor-pointer font-semibold">Tem app na Play Store?</summary>
+                    <p class="px-6 pb-6 text-gray-400">O sistema funciona como PWA — instala na tela do celular como um app, sem precisar de loja de aplicativos.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Final -->
+    <section id="cadastro" class="py-24 gradient-bg">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-6">Comece a agendar agora</h2>
+            <p class="text-white/80 text-lg mb-8 max-w-2xl mx-auto">
+                14 dias grátis. Sem cartão. Cancele quando quiser.
+            </p>
+            <a href="#" class="inline-block bg-white text-purple-600 px-10 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition">
+                Criar Minha Conta Grátis
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-white/10">
+        <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="text-xl font-bold">Agenda<span class="gradient-text">Pro</span></div>
+            <div class="flex gap-6 text-sm text-gray-400">
+                <a href="#" class="hover:text-white transition">Termos</a>
+                <a href="#" class="hover:text-white transition">Privacidade</a>
+                <a href="#" class="hover:text-white transition">Suporte</a>
+            </div>
+            <div class="text-gray-500 text-sm">© 2026 AgendaPro</div>
+        </div>
+    </footer>
+
+</body>
+</html>

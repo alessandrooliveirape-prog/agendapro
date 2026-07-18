@@ -1,0 +1,30 @@
+{
+  "name": "agendapro-backend",
+  "version": "1.0.0",
+  "description": "Backend API do AgendaPro - Sistema de Agendamento",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "db:setup": "node src/database/setup.js",
+    "db:seed": "node src/database/seed.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.4",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^6.9.16",
+    "qrcode": "^1.5.4",
+    "uuid": "^11.1.0",
+    "ws": "^8.21.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

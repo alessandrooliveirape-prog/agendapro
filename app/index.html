@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgendaPro — Painel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%); }
+        .gradient-text { background: linear-gradient(135deg, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body class="bg-gray-950 text-white min-h-screen">
+
+    <!-- Sidebar -->
+    <aside class="fixed left-0 top-0 bottom-0 w-64 bg-gray-900 border-r border-white/10 p-6 hidden lg:block">
+        <div class="text-xl font-bold mb-8">Agenda<span class="gradient-text">Pro</span></div>
+        <nav class="space-y-2">
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/10 text-white">
+                <span>📊</span> Dashboard
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition">
+                <span>📅</span> Agenda
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition">
+                <span>👥</span> Clientes
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition">
+                <span>💼</span> Serviços
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition">
+                <span>⚙️</span> Configurações
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="lg:ml-64 p-6">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-bold">Bom dia, Alessandro! 👋</h1>
+                <p class="text-gray-400">Você tem 8 agendamentos hoje.</p>
+            </div>
+            <div class="flex gap-3">
+                <a href="#" class="glass px-4 py-2 rounded-xl text-sm hover:bg-white/10 transition">
+                    🔗 Meu Link
+                </a>
+                <button class="gradient-bg px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition">
+                    + Novo Agendamento
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="glass rounded-2xl p-5">
+                <div class="text-gray-400 text-sm mb-1">Hoje</div>
+                <div class="text-3xl font-bold">8</div>
+                <div class="text-green-400 text-sm mt-1">↑ 2 vs ontem</div>
+            </div>
+            <div class="glass rounded-2xl p-5">
+                <div class="text-gray-400 text-sm mb-1">Esta Semana</div>
+                <div class="text-3xl font-bold">32</div>
+                <div class="text-green-400 text-sm mt-1">↑ 12% vs semana passada</div>
+            </div>
+            <div class="glass rounded-2xl p-5">
+                <div class="text-gray-400 text-sm mb-1">Receita Mensal</div>
+                <div class="text-3xl font-bold">R$ 4.850</div>
+                <div class="text-green-400 text-sm mt-1">↑ 8% vs mês passado</div>
+            </div>
+            <div class="glass rounded-2xl p-5">
+                <div class="text-gray-400 text-sm mb-1">Taxa de Ocupação</div>
+                <div class="text-3xl font-bold">78%</div>
+                <div class="text-yellow-400 text-sm mt-1">→ estável</div>
+            </div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-6">
+            <!-- Agenda de Hoje -->
+            <div class="lg:col-span-2 glass rounded-2xl p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-lg font-semibold">Agenda de Hoje</h2>
+                    <span class="text-sm text-gray-400">18 de Julho, 2026</span>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-4 p-4 bg-white/5 rounded-xl">
+                        <div class="text-sm text-gray-400 w-20">09:00</div>
+                        <div class="flex-1">
+                            <div class="font-medium">Carlos Silva</div>
+                            <div class="text-gray-400 text-sm">Corte masculino — 30min</div>
+                        </div>
+                        <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">Confirmado</span>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 bg-white/5 rounded-xl">
+                        <div class="text-sm text-gray-400 w-20">09:30</div>
+                        <div class="flex-1">
+                            <div class="font-medium">Pedro Santos</div>
+                            <div class="text-gray-400 text-sm">Barba — 20min</div>
+                        </div>
+                        <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">Confirmado</span>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 bg-white/5 rounded-xl">
+                        <div class="text-sm text-gray-400 w-20">10:00</div>
+                        <div class="flex-1">
+                            <div class="font-medium">João Oliveira</div>
+                            <div class="text-gray-400 text-sm">Corte + Barba — 45min</div>
+                        </div>
+                        <span class="px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs">Pendente</span>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 bg-white/5 rounded-xl">
+                        <div class="text-sm text-gray-400 w-20">11:00</div>
+                        <div class="flex-1">
+                            <div class="font-medium">Lucas Ferreira</div>
+                            <div class="text-gray-400 text-sm">Corte masculino — 30min</div>
+                        </div>
+                        <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">Confirmado</span>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 bg-white/5 rounded-xl">
+                        <div class="text-sm text-gray-400 w-20">14:00</div>
+                        <div class="flex-1">
+                            <div class="font-medium">André Costa</div>
+                            <div class="text-gray-400 text-sm">Degradê — 40min</div>
+                        </div>
+                        <span class="px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs">Pendente</span>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 bg-white/5 rounded-xl">
+                        <div class="text-sm text-gray-400 w-20">15:00</div>
+                        <div class="flex-1">
+                            <div class="font-medium">Ricardo Almeida</div>
+                            <div class="text-gray-400 text-sm">Corte + Barba — 45min</div>
+                        </div>
+                        <span class="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-xs">Não confirmado</span>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 bg-white/5 rounded-xl">
+                        <div class="text-sm text-gray-400 w-20">16:00</div>
+                        <div class="flex-1">
+                            <div class="font-medium">Bruno Nascimento</div>
+                            <div class="text-gray-400 text-sm">Corte social — 25min</div>
+                        </div>
+                        <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">Confirmado</span>
+                    </div>
+                    <div class="flex items-center gap-4 p-4 bg-white/5 rounded-xl">
+                        <div class="text-sm text-gray-400 w-20">17:00</div>
+                        <div class="flex-1">
+                            <div class="font-medium">Fernando Lima</div>
+                            <div class="text-gray-400 text-sm">Barba + Sobrancelha — 30min</div>
+                        </div>
+                        <span class="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">Confirmado</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Info -->
+            <div class="space-y-6">
+                <!-- Próximo Cliente -->
+                <div class="glass rounded-2xl p-6">
+                    <h3 class="font-semibold mb-4">Próximo Cliente</h3>
+                    <div class="text-center">
+                        <div class="w-16 h-16 rounded-full gradient-bg mx-auto mb-3 flex items-center justify-center text-2xl">CS</div>
+                        <div class="font-medium">Carlos Silva</div>
+                        <div class="text-gray-400 text-sm">Corte masculino</div>
+                        <div class="text-gray-400 text-sm">09:00 — 09:30</div>
+                        <div class="flex gap-2 mt-4">
+                            <button class="flex-1 bg-green-500/20 text-green-400 py-2 rounded-lg text-sm font-medium hover:bg-green-500/30 transition">
+                                Confirmar
+                            </button>
+                            <button class="flex-1 bg-white/10 py-2 rounded-lg text-sm font-medium hover:bg-white/20 transition">
+                                WhatsApp
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Link de Agendamento -->
+                <div class="glass rounded-2xl p-6">
+                    <h3 class="font-semibold mb-4">Seu Link de Agendamento</h3>
+                    <div class="bg-white/5 rounded-xl p-3 flex items-center gap-2">
+                        <input type="text" value="agendapro.com/barbearia-do-ze" readonly
+                            class="flex-1 bg-transparent text-sm text-gray-300 outline-none">
+                        <button onclick="copiarLink()" class="px-3 py-1 bg-white/10 rounded-lg text-xs hover:bg-white/20 transition">
+                            Copiar
+                        </button>
+                    </div>
+                    <p class="text-gray-500 text-xs mt-3">Compartilhe no Instagram e WhatsApp</p>
+                </div>
+
+                <!-- Resumo Semanal -->
+                <div class="glass rounded-2xl p-6">
+                    <h3 class="font-semibold mb-4">Resumo da Semana</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">Agendamentos</span>
+                            <span class="font-medium">32</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">Confirmados</span>
+                            <span class="font-medium text-green-400">24</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">Pendentes</span>
+                            <span class="font-medium text-yellow-400">6</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">Cancelados</span>
+                            <span class="font-medium text-red-400">2</span>
+                        </div>
+                        <div class="border-t border-white/10 pt-3 flex justify-between text-sm">
+                            <span class="text-gray-400">Receita Esperada</span>
+                            <span class="font-bold gradient-text">R$ 1.420</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function copiarLink() {
+            navigator.clipboard.writeText('agendapro.com/barbearia-do-ze');
+            alert('Link copiado!');
+        }
+    </script>
+</body>
+</html>
