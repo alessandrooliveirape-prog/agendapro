@@ -32,11 +32,22 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadSubscription();
+    // Só carrega se tiver token
+    const token = localStorage.getItem('agendapro_token');
+    if (token) {
+      loadSubscription();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const loadSubscription = async () => {
     try {
+      const token = localStorage.getItem('agendapro_token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       const data = await api.request<SubscriptionData>('/subscriptions/current');
       setSubscription(data);
     } catch (error) {
