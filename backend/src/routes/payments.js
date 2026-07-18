@@ -55,6 +55,34 @@ router.post('/webhook/stripe', async (req, res) => {
   }
 });
 
+// Enviar mensagem de cobrança via WhatsApp
+router.post('/send-link', authenticate, async (req, res) => {
+  try {
+    const { phone, message } = req.body;
+
+    const WHATSAPP_URL = process.env.WHATSAPP_API_URL || 'http://144.33.22.54:8443';
+    const WHATSAPP_KEY = process.env.WHATSAPP_API_KEY || 'agendapro2026';
+    const INSTANCE = process.env.WHATSAPP_INSTANCE_ID || 'agendapro';
+
+    const response = await fetch(`${WHATSAPP_URL}/message/sendText/${INSTANCE}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': WHATSAPP_KEY,
+      },
+      body: JSON.stringify({
+        number: phone.replace(/\D/g, ''),
+        text: message,
+      }),
+    });
+
+    const result = await response.json();
+    res.json({ success: true, result });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Status de pagamento
 router.get('/status/:appointment_id', authenticate, async (req, res) => {
   try {
