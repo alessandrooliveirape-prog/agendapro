@@ -53,11 +53,21 @@ router.get('/plans', (req, res) => {
 // Obter assinatura atual (requer auth)
 router.get('/current', authenticate, async (req, res) => {
   try {
-    const { data: business } = await supabase
+    console.log('Subscription - userId:', req.userId, 'businessId:', req.businessId);
+    const { data: business, error } = await supabase
       .from('businesses')
       .select('subscription_plan, subscription_expires_at, created_at')
       .eq('id', req.businessId)
       .single();
+
+    if (error) {
+      console.log('Supabase error:', error);
+    }
+    console.log('Business found:', business);
+
+    if (!business) {
+      return res.status(404).json({ error: 'Negócio não encontrado' });
+    }
 
     if (!business) {
       return res.status(404).json({ error: 'Negócio não encontrado' });
