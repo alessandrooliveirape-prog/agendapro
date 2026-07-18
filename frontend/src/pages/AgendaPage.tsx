@@ -85,6 +85,7 @@ export default function AgendaPage() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      console.log('Enviando agendamento:', formData);
       await api.createAppointment(formData);
       toast.success('Agendamento criado!');
       setShowModal(false);
@@ -99,6 +100,7 @@ export default function AgendaPage() {
       });
       loadData();
     } catch (error: any) {
+      console.error('Erro ao criar agendamento:', error);
       toast.error(error.message);
     }
   };
