@@ -85,9 +85,11 @@ export default function AgendaPage() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      console.log('Dados enviados:', JSON.stringify(formData));
-      console.log('service_id tipo:', typeof formData.service_id, 'valor:', formData.service_id);
-      await api.createAppointment(formData);
+      const payload = {
+        ...formData,
+        professional_id: formData.professional_id || undefined,
+      };
+      await api.createAppointment(payload);
       toast.success('Agendamento criado!');
       setShowModal(false);
       setFormData({
@@ -101,7 +103,6 @@ export default function AgendaPage() {
       });
       loadData();
     } catch (error: any) {
-      console.error('Erro completo:', JSON.stringify(error));
       toast.error(error.message);
     }
   };
