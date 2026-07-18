@@ -162,36 +162,137 @@ router.get('/check-limit/:feature', authenticate, async (req, res) => {
   }
 });
 
-// Atualizar plano (requer auth)
-router.post('/upgrade', authenticate, async (req, res) => {
+// Criar checkout para upgrade (requer auth)
+router.post('/checkout', authenticate, async (req, res) => {
   try {
     const { plan } = z.object({ plan: z.enum(['basic', 'pro', 'business']) }).parse(req.body);
-
     const planInfo = PLANS[plan];
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + planInfo.duration_days);
 
-    const { data, error } = await supabase
+    // Buscar configurações de pagamento do negócio
+    const { data: business } = await supabase
       .from('businesses')
-      .update({
-        subscription_plan: plan,
-        subscription_expires_at: expiresAt.toISOString(),
-      })
+      .select('payment_settings, slug')
       .eq('id', req.businessId)
-      .select()
       .single();
 
-    if (error) throw error;
+    const paymentSettings = business?.payment_settings || {};
+    const mpToken = paymentSettings.mercadopago_access_token;
+    const stripeKey = paymentSettings.stripe_secret_key;
+    const pixKey = paymentSettings.pix_key;
 
-    res.json({
-      success: true,
-      message: `Plano ${planInfo.name} ativado com sucesso!`,
-      expires_at: expiresAt.toISOString(),
+    // Tentar Mercado Pago primeiro
+    if (mpToken) {
+      const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${mpToken}`,
+        },
+        body: JSON.stringify({
+          items: [{
+            title: `AgendaPro - Plano ${planInfo.name}`,
+            quantity: 1,
+            unit_price: planInfo.price,
+          }],
+          external_reference: `sub_${req.businessId}_${plan}`,
+          back_urls: {
+            success: `${process.env.FRONTEND_URL || 'https://frontend-one-beta-vnz0jybrfj.vercel.app'}/planos?success=true&plan=${plan}`,
+            failure: `${process.env.FRONTEND_URL || 'https://frontend-one-beta-vnz0jybrfj.vercel.app'}/planos?failed=true`,
+            pending: `${process.env.FRONTEND_URL || 'https://frontend-one-beta-vnz0jybrfj.vercel.app'}/planos?pending=true`,
+          },
+          auto_return: 'approved',
+        }),
+      });
+
+      const data = await response.json();
+      if (data.init_point) {
+        return res.json({ success: true, payment_url: data.init_point, provider: 'mercadopago' });
+      }
+    }
+
+    // Tentar Stripe
+    if (stripeKey) {
+      const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Bearer ${stripeKey}`,
+        },
+        body: new URLSearchParams({
+          'payment_method_types[0]': 'card',
+          'line_items[0][price_data][currency]': 'brl',
+          'line_items[0][price_data][product_data][name]': `AgendaPro - Plano ${planInfo.name}`,
+          'line_items[0][price_data][unit_amount]': planInfo.price * 100,
+          'line_items[0][quantity]': '1',
+          'mode': 'payment',
+          'success_url': `${process.env.FRONTEND_URL || 'https://frontend-one-beta-vnz0jybrfj.vercel.app'}/planos?success=true&plan=${plan}`,
+          'cancel_url': `${process.env.FRONTEND_URL || 'https://frontend-one-beta-vnz0jybrfj.vercel.app'}/planos?canceled=true`,
+          'metadata[business_id]': req.businessId,
+          'metadata[plan]': plan,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.url) {
+        return res.json({ success: true, payment_url: data.url, provider: 'stripe' });
+      }
+    }
+
+    // Se não tem gateway, mas tem PIX
+    if (pixKey) {
+      return res.json({
+        success: true,
+        payment_url: null,
+        provider: 'pix',
+        pix_key: pixKey,
+        amount: planInfo.price,
+        plan: planInfo.name,
+        message: `Envie o PIX de R$${planInfo.price} para ${pixKey} com o assunto: Plano ${planInfo.name} - ${business?.slug}`
+      });
+    }
+
+    // Nenhum gateway configurado
+    res.status(400).json({
+      error: 'Nenhum método de pagamento configurado',
+      message: 'Configure um gateway de pagamento (Stripe, Mercado Pago ou PIX) em Configurações > Pagamentos'
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: 'Plano inválido' });
     }
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Ativar plano após pagamento confirmado (usado por webhooks)
+router.post('/activate', async (req, res) => {
+  try {
+    const { business_id, plan } = req.body;
+
+    if (!business_id || !plan) {
+      return res.status(400).json({ error: 'business_id e plan são obrigatórios' });
+    }
+
+    const planInfo = PLANS[plan];
+    if (!planInfo) {
+      return res.status(400).json({ error: 'Plano inválido' });
+    }
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + planInfo.duration_days);
+
+    const { error } = await supabase
+      .from('businesses')
+      .update({
+        subscription_plan: plan,
+        subscription_expires_at: expiresAt.toISOString(),
+      })
+      .eq('id', business_id);
+
+    if (error) throw error;
+
+    res.json({ success: true, message: `Plano ${planInfo.name} ativado` });
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });

@@ -66,12 +66,19 @@ export default function PricingPage() {
   const handleUpgrade = async (planId: string) => {
     setLoading(planId);
     try {
-      await api.request('/subscriptions/upgrade', {
+      const result = await api.request<{ payment_url?: string; provider?: string; message?: string }>('/subscriptions/checkout', {
         method: 'POST',
         body: JSON.stringify({ plan: planId }),
       });
-      toast.success('Plano ativado com sucesso!');
-      await refresh();
+
+      if (result.payment_url) {
+        window.location.href = result.payment_url;
+      } else {
+        toast(result.message || 'Configure um gateway de pagamento em Configurações > Pagamentos', {
+          icon: '💳',
+          duration: 8000,
+        });
+      }
     } catch (error: any) {
       toast.error(error.message);
     } finally {
