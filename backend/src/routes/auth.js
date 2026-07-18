@@ -184,9 +184,17 @@ router.post('/reset-password', async (req, res) => {
       { expiresIn: '1h' }
     );
 
-    // Em produção, enviar email com o link
-    // Por agora, apenas logamos
-    console.log(`Token de redefinição para ${email}: ${resetToken}`);
+    // Gerar link de redefinição
+    const frontendUrl = process.env.FRONTEND_URL || 'https://frontend-one-beta-vnz0jybrfj.vercel.app';
+    const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
+
+    // Enviar email
+    const { sendEmail, passwordResetEmail } = await import('../config/email.js');
+    const emailContent = passwordResetEmail(email, resetUrl);
+    await sendEmail(email, emailContent.subject, emailContent.html);
+
+    console.log(`Email de redefinição enviado para ${email}`);
+    console.log(`Link: ${resetUrl}`);
 
     res.json({ message: 'Se o email existir, instruções foram enviadas.' });
   } catch (error) {

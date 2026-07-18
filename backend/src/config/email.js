@@ -32,6 +32,34 @@ export async function sendEmail(to, subject, html) {
   }
 }
 
+export function passwordResetEmail(email, resetUrl) {
+  return {
+    to: email,
+    subject: 'AgendaPro — Redefinir sua senha',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #6366f1, #a855f7); padding: 30px; text-align: center;">
+          <h1 style="color: white; margin: 0;">Redefinir Senha</h1>
+        </div>
+        <div style="padding: 30px; background: #f9fafb;">
+          <p>Olá,</p>
+          <p>Você solicitou a redefinição da sua senha no AgendaPro.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetUrl}" style="background: linear-gradient(135deg, #6366f1, #a855f7); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+              Redefinir Minha Senha
+            </a>
+          </div>
+          <p style="color: #6b7280; font-size: 14px;">Se você não solicitou esta redefinição, ignore este email.</p>
+          <p style="color: #6b7280; font-size: 14px;">Este link expira em 1 hora.</p>
+        </div>
+        <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">
+          <p>AgendaPro — Sistema de Agendamento</p>
+        </div>
+      </div>
+    `,
+  };
+}
+
 export function appointmentReminderEmail(appointment) {
   const { client_name, client_email, service_name, date, time, business_name } = appointment;
   return {

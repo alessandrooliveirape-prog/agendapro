@@ -16,6 +16,7 @@ import RecurringPage from './pages/RecurringPage';
 import PricingPage from './pages/PricingPage';
 import PaymentHistoryPage from './pages/PaymentHistoryPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -43,6 +44,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={user ? <Navigate to="/" /> : <LoginPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<DashboardPage />} />
         <Route path="agenda" element={<AgendaPage />} />
