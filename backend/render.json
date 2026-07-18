@@ -1,0 +1,12 @@
+{
+  "services": [
+    {
+      "type": "web",
+      "name": "agendapro-backend",
+      "runtime": "node",
+      "buildCommand": "npm install",
+      "startCommand": "node src/server.js",
+      "autoDeploy": true
+    }
+  ]
+}
