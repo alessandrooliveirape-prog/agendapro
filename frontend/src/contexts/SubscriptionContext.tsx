@@ -29,31 +29,28 @@ const SubscriptionContext = createContext<SubscriptionContextType | undefined>(u
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Só carrega se tiver token
-    const token = localStorage.getItem('agendapro_token');
-    if (token) {
-      loadSubscription();
-    } else {
-      setLoading(false);
+    try {
+      const token = localStorage.getItem('agendapro_token');
+      if (token) {
+        loadSubscription();
+      }
+    } catch (e) {
+      console.error('Erro init subscription:', e);
     }
   }, []);
 
   const loadSubscription = async () => {
     try {
       const token = localStorage.getItem('agendapro_token');
-      if (!token) {
-        setLoading(false);
-        return;
-      }
+      if (!token) return;
       const data = await api.request<SubscriptionData>('/subscriptions/current');
       setSubscription(data);
     } catch (error) {
-      console.error('Erro ao carregar assinatura:', error);
-    } finally {
-      setLoading(false);
+      // Ignorar erros silenciosamente
+      setSubscription(null);
     }
   };
 
