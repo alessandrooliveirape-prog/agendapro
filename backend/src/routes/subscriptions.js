@@ -53,21 +53,11 @@ router.get('/plans', (req, res) => {
 // Obter assinatura atual (requer auth)
 router.get('/current', authenticate, async (req, res) => {
   try {
-    console.log('Subscription - userId:', req.userId, 'businessId:', req.businessId);
     const { data: business, error } = await supabase
       .from('businesses')
       .select('subscription_plan, subscription_expires_at, created_at')
       .eq('id', req.businessId)
       .single();
-
-    if (error) {
-      console.log('Supabase error:', error);
-    }
-    console.log('Business found:', business);
-
-    if (!business) {
-      return res.status(404).json({ error: 'Negócio não encontrado' });
-    }
 
     if (!business) {
       return res.status(404).json({ error: 'Negócio não encontrado' });
@@ -288,14 +278,10 @@ router.post('/cancel', authenticate, async (req, res) => {
   }
 });
 
-// Ativar plano após pagamento confirmado (usado por webhooks)
-router.post('/activate', async (req, res) => {
+// Ativar plano após pagamento confirmado (requer auth - só o próprio negócio)
+router.post('/activate', authenticate, async (req, res) => {
   try {
-    const { business_id, plan } = req.body;
-
-    if (!business_id || !plan) {
-      return res.status(400).json({ error: 'business_id e plan são obrigatórios' });
-    }
+    const { plan } = z.object({ plan: z.enum(['basic', 'pro', 'business']) }).parse(req.body);
 
     const planInfo = PLANS[plan];
     if (!planInfo) {
@@ -311,12 +297,15 @@ router.post('/activate', async (req, res) => {
         subscription_plan: plan,
         subscription_expires_at: expiresAt.toISOString(),
       })
-      .eq('id', business_id);
+      .eq('id', req.businessId);
 
     if (error) throw error;
 
     res.json({ success: true, message: `Plano ${planInfo.name} ativado` });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: 'Dados inválidos', details: error.errors });
+    }
     res.status(500).json({ error: error.message });
   }
 });

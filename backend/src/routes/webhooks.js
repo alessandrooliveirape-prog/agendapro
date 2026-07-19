@@ -78,10 +78,4 @@ router.post('/whatsapp', async (req, res) => {
   }
 });
 
-// Webhook genérico para testes
-router.post('/test', (req, res) => {
-  console.log('Webhook recebido:', req.body);
-  res.json({ received: true, body: req.body });
-});
-
 export { router as webhookRoutes };

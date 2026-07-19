@@ -8,7 +8,11 @@ const router = Router();
 // Criar sessão de pagamento (Stripe Checkout)
 router.post('/create-checkout', authenticate, async (req, res) => {
   try {
-    const { appointment_id, amount, description } = req.body;
+    const { appointment_id, amount, description } = z.object({
+      appointment_id: z.string().uuid(),
+      amount: z.number().positive(),
+      description: z.string().optional(),
+    }).parse(req.body);
 
     // Em produção, aqui integraria com Stripe
     // Por enquanto, simulamos o pagamento
@@ -32,6 +36,9 @@ router.post('/create-checkout', authenticate, async (req, res) => {
       message: 'Pagamento processado com sucesso'
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: 'Dados inválidos', details: error.errors });
+    }
     res.status(500).json({ error: error.message });
   }
 });
@@ -157,28 +164,26 @@ router.post('/webhook/mercadopago', async (req, res) => {
     console.log('Mercado Pago webhook:', type, data);
 
     if (type === 'payment') {
-      // Buscar detalhes do pagamento
       const paymentId = data.id;
 
-      // Buscar business_id do external_reference
-      const { data: payment } = await supabase
-        .from('appointments')
-        .select('business_id, id')
-        .eq('id', paymentId)
-        .single();
+      // Buscar pagamento via external_reference (ID do appointment)
+      const appointmentId = req.body.external_reference;
 
-      if (payment) {
-        // Atualizar status do pagamento
+      if (appointmentId) {
+        // Atualizar status do pagamento do agendamento
         await supabase
           .from('appointments')
           .update({ payment_status: 'paid', payment_method: 'mercadopago' })
-          .eq('id', paymentId);
+          .eq('id', appointmentId);
       }
     }
 
     // Webhook de assinatura (upgrade)
     if (type === 'payment' && req.body.external_reference?.startsWith('sub_')) {
-      const [, businessId, plan] = req.body.external_reference.split('_');
+      const parts = req.body.external_reference.split('_');
+      // Format: sub_{businessId}_{plan} where businessId is a UUID (no underscores)
+      const plan = parts[parts.length - 1];
+      const businessId = parts.slice(1, -1).join('_');
       const paymentStatus = req.body.status;
 
       if (paymentStatus === 'approved') {
@@ -283,27 +288,18 @@ router.get('/history', authenticate, async (req, res) => {
 // Enviar mensagem de cobrança via WhatsApp
 router.post('/send-link', authenticate, async (req, res) => {
   try {
-    const { phone, message } = req.body;
+    const { phone, message } = z.object({
+      phone: z.string().min(10),
+      message: z.string().min(1),
+    }).parse(req.body);
 
-    const WHATSAPP_URL = process.env.WHATSAPP_API_URL || 'http://144.33.22.54:8443';
-    const WHATSAPP_KEY = process.env.WHATSAPP_API_KEY || 'agendapro2026';
-    const INSTANCE = process.env.WHATSAPP_INSTANCE_ID || 'agendapro';
-
-    const response = await fetch(`${WHATSAPP_URL}/message/sendText/${INSTANCE}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': WHATSAPP_KEY,
-      },
-      body: JSON.stringify({
-        number: phone.replace(/\D/g, ''),
-        text: message,
-      }),
-    });
-
-    const result = await response.json();
-    res.json({ success: true, result });
+    const { sendWhatsAppMessage } = await import('../config/whatsapp.js');
+    const result = await sendWhatsAppMessage(phone, message);
+    res.json(result);
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: 'Dados inválidos', details: error.errors });
+    }
     res.status(500).json({ error: error.message });
   }
 });

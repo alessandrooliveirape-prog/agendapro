@@ -69,31 +69,11 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      // Simular dados do Google (em produção, usar Google OAuth SDK)
-      // Por enquanto, pedir email do Google
-      const googleEmail = prompt('Digite seu email do Google:');
-      if (!googleEmail) {
-        setLoading(false);
-        return;
-      }
-
-      const googleName = googleEmail.split('@')[0];
-
-      const result = await api.request<{ token: string; user: any; business: any; isNewUser: boolean }>('/auth/google', {
-        method: 'POST',
-        body: JSON.stringify({
-          email: googleEmail,
-          name: googleName,
-          google_id: 'google_' + googleEmail,
-          avatar_url: null,
-        }),
-      });
-
-      // Salvar token
-      localStorage.setItem('agendapro_token', result.token);
-
-      toast.success(result.isNewUser ? 'Conta criada com sucesso!' : 'Login realizado!');
-      window.location.href = '/';
+      // Google OAuth real seria integrado aqui via @react-oauth/google ou similar
+      // Por enquanto, desabilitado com mensagem informativa
+      toast.error('Login com Google será disponível em breve. Use email e senha.');
+      setLoading(false);
+      return;
     } catch (error: any) {
       toast.error(error.message || 'Erro ao fazer login com Google');
     } finally {
@@ -162,9 +142,9 @@ export default function LoginPage() {
 
               {/* Divisor */}
               <div className="flex items-center gap-4 my-4">
-                <div class="flex-1 h-px bg-white/10"></div>
-                <span class="text-gray-500 text-sm">ou</span>
-                <div class="flex-1 h-px bg-white/10"></div>
+                <div className="flex-1 h-px bg-white/10"></div>
+                <span className="text-gray-500 text-sm">ou</span>
+                <div className="flex-1 h-px bg-white/10"></div>
               </div>
 
               {/* Botão Google */}

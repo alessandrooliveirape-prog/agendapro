@@ -1,82 +1,80 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { supabase } from '../config/database.js';
+import { authenticate } from '../middleware/auth.js';
 
 const router = Router();
+router.use(authenticate);
 
 // Gerar QR Code PIX
 router.post('/qrcode', async (req, res) => {
   try {
-    const { amount, description, business_id } = req.body;
+    const { amount, description } = z.object({
+      amount: z.number().positive(),
+      description: z.string().optional(),
+    }).parse(req.body);
 
-    // Buscar chave PIX do negócio
-    let pixKey = '03330821418'; // Chave padrão
+    // Buscar chave PIX do negócio autenticado
+    const { data: business } = await supabase
+      .from('businesses')
+      .select('payment_settings')
+      .eq('id', req.businessId)
+      .single();
 
-    if (business_id) {
-      const { data: business } = await supabase
-        .from('businesses')
-        .select('payment_settings')
-        .eq('id', business_id)
-        .single();
+    const pixKey = business?.payment_settings?.pix_key;
 
-      if (business?.payment_settings?.pix_key) {
-        pixKey = business.payment_settings.pix_key;
-      }
+    if (!pixKey) {
+      return res.status(400).json({ error: 'Chave PIX não configurada. Configure em Configurações > Pagamentos.' });
     }
 
-    // Gerar payload PIX (simplificado)
-    // Em produção, use uma lib como 'pix-qrcode' ou API do banco
     const pixPayload = {
       key: pixKey,
-      amount: amount || 0,
+      amount,
       description: description || 'AgendaPro',
       merchant_name: 'AgendaPro',
       merchant_city: 'Sao Paulo',
     };
 
-    // URL de pagamento PIX (formato copia e cola)
-    const pixUrl = `pix:${pixKey}?amount=${amount || 0}&description=${encodeURIComponent(description || 'AgendaPro')}`;
-
     res.json({
       success: true,
       pix_key: pixKey,
-      pix_type: 'cpf',
-      amount: amount || 0,
+      amount,
       description: description || 'AgendaPro',
       payload: pixPayload,
-      message: `Chave PIX: ${pixKey}\nValor: R$${amount || 0}\nDescrição: ${description || 'AgendaPro'}`
+      message: `Chave PIX: ${pixKey}\nValor: R$${amount}\nDescrição: ${description || 'AgendaPro'}`
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: 'Dados inválidos', details: error.errors });
+    }
     res.status(500).json({ error: error.message });
   }
 });
 
-// Gerar imagem QR Code (via API pública)
+// Gerar imagem QR Code
 router.get('/qrcode-image', async (req, res) => {
   try {
-    const { amount, description, business_id } = req.query;
+    const { amount, description } = req.query;
 
-    let pixKey = '03330821418';
+    const { data: business } = await supabase
+      .from('businesses')
+      .select('payment_settings')
+      .eq('id', req.businessId)
+      .single();
 
-    if (business_id) {
-      const { data: business } = await supabase
-        .from('businesses')
-        .select('payment_settings')
-        .eq('id', business_id)
-        .single();
+    const pixKey = business?.payment_settings?.pix_key;
 
-      if (business?.payment_settings?.pix_key) {
-        pixKey = business.payment_settings.pix_key;
-      }
+    if (!pixKey) {
+      return res.status(400).json({ error: 'Chave PIX não configurada.' });
     }
 
-    // Gerar QR Code usando API pública
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=pix:${pixKey}?amount=${amount || 0}`;
 
     res.json({
       success: true,
       qr_code_url: qrUrl,
       pix_key: pixKey,
-      amount: amount || 0,
+      amount: parseFloat(amount) || 0,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

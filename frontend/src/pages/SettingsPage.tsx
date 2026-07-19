@@ -22,6 +22,13 @@ export default function SettingsPage() {
       saturday: { start: '09:00', end: '14:00', active: true },
       sunday: { start: '00:00', end: '00:00', active: false },
     },
+    payment_settings: {
+      stripe_public_key: '',
+      stripe_secret_key: '',
+      mercadopago_access_token: '',
+      mercadopago_public_key: '',
+      pix_key: '',
+    },
   });
 
   const days = {
@@ -70,6 +77,13 @@ export default function SettingsPage() {
         address: data.address || '',
         description: data.description || '',
         working_hours: workingHours,
+        payment_settings: {
+          stripe_public_key: data.payment_settings?.stripe_public_key || '',
+          stripe_secret_key: data.payment_settings?.stripe_secret_key || '',
+          mercadopago_access_token: data.payment_settings?.mercadopago_access_token || '',
+          mercadopago_public_key: data.payment_settings?.mercadopago_public_key || '',
+          pix_key: data.payment_settings?.pix_key || '',
+        },
       });
     } catch (error) {
       console.error(error);
@@ -266,7 +280,11 @@ export default function SettingsPage() {
                 type="text"
                 placeholder="pk_live_..."
                 className="input"
-                id="stripe_public"
+                value={formData.payment_settings.stripe_public_key}
+                onChange={e => setFormData({
+                  ...formData,
+                  payment_settings: { ...formData.payment_settings, stripe_public_key: e.target.value }
+                })}
               />
             </div>
             <div>
@@ -275,7 +293,11 @@ export default function SettingsPage() {
                 type="password"
                 placeholder="sk_live_..."
                 className="input"
-                id="stripe_secret"
+                value={formData.payment_settings.stripe_secret_key}
+                onChange={e => setFormData({
+                  ...formData,
+                  payment_settings: { ...formData.payment_settings, stripe_secret_key: e.target.value }
+                })}
               />
             </div>
           </div>
@@ -299,7 +321,11 @@ export default function SettingsPage() {
                 type="password"
                 placeholder="APP_USR-..."
                 className="input"
-                id="mp_token"
+                value={formData.payment_settings.mercadopago_access_token}
+                onChange={e => setFormData({
+                  ...formData,
+                  payment_settings: { ...formData.payment_settings, mercadopago_access_token: e.target.value }
+                })}
               />
             </div>
             <div>
@@ -308,7 +334,11 @@ export default function SettingsPage() {
                 type="text"
                 placeholder="APP_USR-..."
                 className="input"
-                id="mp_public"
+                value={formData.payment_settings.mercadopago_public_key}
+                onChange={e => setFormData({
+                  ...formData,
+                  payment_settings: { ...formData.payment_settings, mercadopago_public_key: e.target.value }
+                })}
               />
             </div>
           </div>
@@ -331,7 +361,11 @@ export default function SettingsPage() {
               type="text"
               placeholder="seu@email.com"
               className="input"
-              id="pix_key"
+              value={formData.payment_settings.pix_key}
+              onChange={e => setFormData({
+                ...formData,
+                payment_settings: { ...formData.payment_settings, pix_key: e.target.value }
+              })}
             />
           </div>
         </div>

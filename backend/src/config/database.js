@@ -52,12 +52,17 @@ class MockQuery {
     this.orderBy = null;
     this.limitCount = null;
     this.isSingle = false;
+    this.isHead = false;
+    this.isCount = false;
+    this._operation = null; // 'select' | 'insert' | 'update' | 'delete'
+    this._operationData = null;
   }
 
   select(fields = '*', options = {}) {
     this.selectFields = fields;
     if (options.head) this.isHead = true;
     if (options.count === 'exact') this.isCount = true;
+    this._operation = this._operation || 'select';
     return this;
   }
 
@@ -116,34 +121,21 @@ class MockQuery {
     return this;
   }
 
-  async insert(data) {
-    const items = Array.isArray(data) ? data : [data];
-    const inserted = items.map(item => ({
-      id: crypto.randomUUID(),
-      created_at: new Date().toISOString(),
-      ...item,
-    }));
-    mockData[this.table] = [...(mockData[this.table] || []), ...inserted];
-    return { data: this.isSingle ? inserted[0] : inserted, error: null };
+  insert(data) {
+    this._operation = 'insert';
+    this._operationData = Array.isArray(data) ? data : [data];
+    return this;
   }
 
-  async update(data) {
-    const table = mockData[this.table] || [];
-    const updated = [];
-    for (let i = 0; i < table.length; i++) {
-      if (this.matchFilters(table[i])) {
-        table[i] = { ...table[i], ...data, updated_at: new Date().toISOString() };
-        updated.push(table[i]);
-      }
-    }
-    mockData[this.table] = table;
-    return { data: this.isSingle ? updated[0] : updated, error: null };
+  update(data) {
+    this._operation = 'update';
+    this._operationData = data;
+    return this;
   }
 
-  async delete() {
-    const table = mockData[this.table] || [];
-    mockData[this.table] = table.filter(item => !this.matchFilters(item));
-    return { data: null, error: null };
+  delete() {
+    this._operation = 'delete';
+    return this;
   }
 
   matchFilters(item) {
@@ -155,14 +147,92 @@ class MockQuery {
       if (filter.type === 'lt') return item[filter.field] < filter.value;
       if (filter.type === 'lte') return item[filter.field] <= filter.value;
       if (filter.type === 'ilike') {
-        const regex = new RegExp(filter.pattern.replace(/%/g, '.*'), 'i');
+        const escaped = filter.pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/%/g, '.*');
+        const regex = new RegExp(`^${escaped}$`, 'i');
         return regex.test(item[filter.field]);
+      }
+      if (filter.type === 'or') {
+        const conditions = filter.conditions.split(',');
+        return conditions.some(cond => {
+          const match = cond.match(/^(\w+)\.(\w+)\.(.+)$/);
+          if (!match) return false;
+          const [, field, op, value] = match;
+          const fieldValue = item[field];
+          if (op === 'eq') return fieldValue === value;
+          if (op === 'neq') return fieldValue !== value;
+          if (op === 'gt') return fieldValue > value;
+          if (op === 'gte') return fieldValue >= value;
+          if (op === 'lt') return fieldValue < value;
+          if (op === 'lte') return fieldValue <= value;
+          if (op === 'ilike') {
+            const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/%/g, '.*');
+            const regex = new RegExp(`^${escaped}$`, 'i');
+            return regex.test(fieldValue);
+          }
+          return true;
+        });
       }
       return true;
     });
   }
 
+  _resolveJoins(results) {
+    if (this.selectFields && this.selectFields !== '*') {
+      const joinPattern = /(\w+)\(([^)]+)\)/g;
+      let match;
+      while ((match = joinPattern.exec(this.selectFields)) !== null) {
+        const [, joinTable, joinFields] = match;
+        const foreignKey = `${joinTable.replace(/s$/, '')}_id`;
+        const relatedData = mockData[joinTable] || [];
+        results = results.map(item => {
+          const fk = item[foreignKey];
+          const related = relatedData.find(r => r.id === fk);
+          if (related) {
+            const fields = joinFields.split(',').map(f => f.trim());
+            const projected = {};
+            fields.forEach(f => { projected[f] = related[f]; });
+            return { ...item, [joinTable]: projected };
+          }
+          return { ...item, [joinTable]: null };
+        });
+      }
+    }
+    return results;
+  }
+
   then(resolve) {
+    if (this._operation === 'insert') {
+      const items = this._operationData.map(item => ({
+        id: crypto.randomUUID(),
+        created_at: new Date().toISOString(),
+        ...item,
+      }));
+      mockData[this.table] = [...(mockData[this.table] || []), ...items];
+      const result = { data: this.isSingle ? items[0] : items, error: null };
+      return resolve(result);
+    }
+
+    if (this._operation === 'update') {
+      const table = mockData[this.table] || [];
+      const updated = [];
+      for (let i = 0; i < table.length; i++) {
+        if (this.matchFilters(table[i])) {
+          table[i] = { ...table[i], ...this._operationData, updated_at: new Date().toISOString() };
+          updated.push(table[i]);
+        }
+      }
+      mockData[this.table] = table;
+      const result = { data: this.isSingle ? updated[0] : updated, error: null };
+      return resolve(result);
+    }
+
+    if (this._operation === 'delete') {
+      const table = mockData[this.table] || [];
+      mockData[this.table] = table.filter(item => !this.matchFilters(item));
+      return resolve({ data: null, error: null });
+    }
+
+    // Default: select
     const table = mockData[this.table] || [];
     let results = table.filter(item => this.matchFilters(item));
 
@@ -181,6 +251,8 @@ class MockQuery {
     if (this.isCount) {
       return resolve({ data: null, count: results.length, error: null });
     }
+
+    results = this._resolveJoins(results);
 
     if (this.isSingle) {
       return resolve({ data: results[0] || null, error: results[0] ? null : { message: 'Not found' } });
@@ -215,13 +287,14 @@ if (useMock) {
 
   mockData.businesses.push(demoBusiness);
 
-  // Demo user - senha: 123456
+  // Demo user - senha: 123456 (pre-hashed with bcrypt)
+  const bcryptHash = '$2a$10$YQ8GvPvJvQZkfR1qXvMz3OZKqJjCkF5sLxNvBqH5mN7tR8uP2kW4a';
   mockData.users.push({
     id: 'demo-user-id',
     business_id: 'demo-business-id',
     name: 'José da Silva',
     email: 'ze@barbearia.com',
-    password_hash: '123456', // Mock mode: aceita senha direta
+    password_hash: '$2a$10$OKxxy7sQkKlAs9qydyLxi.gA9gEgqWB3/Hkazh19cW6GEFN68eHVu',
     role: 'owner',
   });
 

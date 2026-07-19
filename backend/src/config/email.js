@@ -1,5 +1,15 @@
 import nodemailer from 'nodemailer';
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: parseInt(process.env.SMTP_PORT || '587'),
@@ -64,20 +74,20 @@ export function appointmentReminderEmail(appointment) {
   const { client_name, client_email, service_name, date, time, business_name } = appointment;
   return {
     to: client_email,
-    subject: `Lembrete: Seu agendamento amanhã - ${business_name}`,
+    subject: `Lembrete: Seu agendamento amanhã - ${escapeHtml(business_name)}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: linear-gradient(135deg, #6366f1, #a855f7); padding: 30px; text-align: center;">
           <h1 style="color: white; margin: 0;">Lembrete de Agendamento</h1>
         </div>
         <div style="padding: 30px; background: #f9fafb;">
-          <p>Olá <strong>${client_name}</strong>,</p>
+          <p>Olá <strong>${escapeHtml(client_name)}</strong>,</p>
           <p>Você tem um agendamento amanhã:</p>
           <div style="background: white; padding: 20px; border-radius: 10px; border-left: 4px solid #6366f1;">
-            <p style="margin: 5px 0;"><strong>Serviço:</strong> ${service_name}</p>
-            <p style="margin: 5px 0;"><strong>Data:</strong> ${date}</p>
-            <p style="margin: 5px 0;"><strong>Horário:</strong> ${time}</p>
-            <p style="margin: 5px 0;"><strong>Local:</strong> ${business_name}</p>
+            <p style="margin: 5px 0;"><strong>Serviço:</strong> ${escapeHtml(service_name)}</p>
+            <p style="margin: 5px 0;"><strong>Data:</strong> ${escapeHtml(date)}</p>
+            <p style="margin: 5px 0;"><strong>Horário:</strong> ${escapeHtml(time)}</p>
+            <p style="margin: 5px 0;"><strong>Local:</strong> ${escapeHtml(business_name)}</p>
           </div>
           <p style="margin-top: 20px;">Para cancelar ou reagendar, entre em contato conosco.</p>
         </div>

@@ -71,7 +71,9 @@ router.get('/dashboard', async (req, res) => {
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekEnd.getDate() + 6);
     const monthStart = new Date(today.slice(0, 7) + '-01');
-    const monthEnd = new Date(today.slice(0, 7) + '-28');
+    const monthEnd = new Date(monthStart);
+    monthEnd.setMonth(monthEnd.getMonth() + 1);
+    monthEnd.setDate(0); // Last day of previous month = last day of current month
 
     // Agendamentos de hoje
     const { count: todayCount } = await supabase

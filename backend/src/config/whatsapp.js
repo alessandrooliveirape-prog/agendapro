@@ -1,7 +1,7 @@
 const whatsappConfig = {
-  apiUrl: process.env.WHATSAPP_API_URL || 'http://144.33.22.54:8443',
-  instanceId: process.env.WHATSAPP_INSTANCE_ID || 'agendapro',
-  apiKey: process.env.WHATSAPP_API_KEY || 'agendapro2026',
+  apiUrl: process.env.WHATSAPP_API_URL,
+  instanceId: process.env.WHATSAPP_INSTANCE_ID,
+  apiKey: process.env.WHATSAPP_API_KEY,
 };
 
 export async function sendWhatsAppMessage(phone, message) {

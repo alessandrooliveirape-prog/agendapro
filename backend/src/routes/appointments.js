@@ -72,15 +72,15 @@ router.post('/', async (req, res) => {
     const endMins = endMinutes % 60;
     const endTime = `${String(endHours).padStart(2, '0')}:${String(endMins).padStart(2, '0')}`;
 
-    // Verificar conflito de horário
+    // Verificar conflito de horário (overlap: new starts before existing ends AND new ends after existing starts)
     const { data: conflicts } = await supabase
       .from('appointments')
       .select('id')
       .eq('business_id', req.businessId)
       .eq('date', data.date)
       .neq('status', 'cancelled')
-      .or(`time.lte.${data.time},end_time.gt.${data.time}`)
-      .or(`time.lt.${endTime},end_time.gte.${endTime}`);
+      .lt('time', endTime)
+      .gt('end_time', data.time);
 
     if (conflicts && conflicts.length > 0) {
       return res.status(409).json({ error: 'Horário já ocupado' });
@@ -184,10 +184,19 @@ router.patch('/:id/status', async (req, res) => {
 
     // Se cancelou, decrementar total de agendamentos do cliente
     if (status === 'cancelled' && appointment.client_id) {
-      await supabase
+      // Buscar total atual e decrementar
+      const { data: client } = await supabase
         .from('clients')
-        .update({ total_appointments: supabase.rpc('decrement') })
-        .eq('id', appointment.client_id);
+        .select('total_appointments')
+        .eq('id', appointment.client_id)
+        .single();
+
+      if (client && client.total_appointments > 0) {
+        await supabase
+          .from('clients')
+          .update({ total_appointments: client.total_appointments - 1 })
+          .eq('id', appointment.client_id);
+      }
     }
 
     res.json(appointment);

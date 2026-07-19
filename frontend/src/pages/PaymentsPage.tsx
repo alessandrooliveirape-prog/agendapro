@@ -21,9 +21,11 @@ export default function PaymentsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'paid'>('all');
   const [generating, setGenerating] = useState<string | null>(null);
+  const [pixKey, setPixKey] = useState('');
 
   useEffect(() => {
     loadAppointments();
+    loadPixKey();
   }, []);
 
   const loadAppointments = async () => {
@@ -34,6 +36,15 @@ export default function PaymentsPage() {
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadPixKey = async () => {
+    try {
+      const business = await api.getBusiness();
+      setPixKey(business?.payment_settings?.pix_key || '');
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -104,7 +115,10 @@ export default function PaymentsPage() {
 
   // Enviar cobrança via WhatsApp
   const sendPaymentLink = async (apt: Appointment) => {
-    const pixKey = 'seu@email.com'; // Buscar das configurações
+    if (!pixKey) {
+      toast.error('Configure sua chave PIX em Configurações > Pagamentos');
+      return;
+    }
     const message = `Olá ${apt.client_name}! 👋\n\nSeu agendamento: *${apt.service_name}*\nData: ${apt.date} às ${apt.time}\nValor: *R$${apt.price}*\n\nPara pagar, envie o PIX para:\n📧 ${pixKey}\n\nApós o pagamento, envie o comprovante por aqui. 😊`;
     try {
       await api.request('/payments/send-link', {

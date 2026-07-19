@@ -17,12 +17,58 @@ import PricingPage from './pages/PricingPage';
 import PaymentHistoryPage from './pages/PaymentHistoryPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import { Component, type ReactNode } from 'react';
+
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-950">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-2">Algo deu errado</h1>
+            <p className="text-gray-400 mb-4">Ocorreu um erro inesperado.</p>
+            <button onClick={() => window.location.reload()} className="btn btn-primary">
+              Recarregar
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) return <LoadingScreen />;
   if (!user) return <Navigate to="/login" />;
   return <>{children}</>;
+}
+
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  if (loading) return <LoadingScreen />;
+  if (!user) return <Navigate to="/login" />;
+  if (user.role !== 'admin') return <Navigate to="/" />;
+  return <>{children}</>;
+}
+
+function NotFoundPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-950">
+      <div className="text-center">
+        <h1 className="text-6xl font-bold text-gray-700 mb-4">404</h1>
+        <p className="text-gray-400 mb-6">Página não encontrada</p>
+        <a href="/" className="btn btn-primary">Voltar ao início</a>
+      </div>
+    </div>
+  );
 }
 
 function LoadingScreen() {
@@ -57,30 +103,33 @@ function AppRoutes() {
         <Route path="recorrentes" element={<RecurringPage />} />
         <Route path="planos" element={<PricingPage />} />
         <Route path="historico-pagamentos" element={<PaymentHistoryPage />} />
-        <Route path="admin" element={<AdminDashboardPage />} />
+        <Route path="admin" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
       </Route>
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <SubscriptionProvider>
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              style: {
-                background: '#1f2937',
-                color: '#fff',
-                borderRadius: '12px',
-              },
-            }}
-          />
-          <AppRoutes />
-        </SubscriptionProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AuthProvider>
+          <SubscriptionProvider>
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                style: {
+                  background: '#1f2937',
+                  color: '#fff',
+                  borderRadius: '12px',
+                },
+              }}
+            />
+            <AppRoutes />
+          </SubscriptionProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }

@@ -20,6 +20,7 @@ import {
   Shield,
 } from 'lucide-react';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -53,7 +54,7 @@ export default function Layout() {
   const copyLink = () => {
     const slug = business?.slug || 'meu-negocio';
     navigator.clipboard.writeText(`${window.location.origin}/agendar/${slug}`);
-    alert('Link copiado!');
+    toast.success('Link copiado!');
   };
 
   return (

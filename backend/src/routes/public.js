@@ -276,8 +276,7 @@ router.post('/:slug/book', async (req, res) => {
 
     // Enviar confirmação via WhatsApp
     if (business.whatsapp_enabled && data.client_phone) {
-      const { sendWhatsAppMessage } = await import('../config/whatsapp.js');
-      const { formatConfirmation } = await import('../config/whatsapp.js');
+      const { sendWhatsAppMessage, formatConfirmation } = await import('../config/whatsapp.js');
       const formattedDate = new Date(data.date + 'T12:00:00').toLocaleDateString('pt-BR');
       await sendWhatsAppMessage(
         data.client_phone,

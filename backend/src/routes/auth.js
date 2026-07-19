@@ -13,6 +13,7 @@ const registerSchema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
   password: z.string().min(6),
+  phone: z.string().optional(),
 });
 
 const loginSchema = z.object({
@@ -96,18 +97,7 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Email ou senha incorretos' });
     }
 
-    // Verificar senha (bcrypt ou texto plano)
-    let validPassword = false;
-
-    try {
-      validPassword = await bcrypt.compare(password, user.password_hash);
-    } catch (e) {
-      validPassword = password === user.password_hash;
-    }
-
-    if (!validPassword) {
-      validPassword = password === user.password_hash;
-    }
+    const validPassword = await bcrypt.compare(password, user.password_hash);
 
     if (!validPassword) {
       return res.status(401).json({ error: 'Email ou senha incorretos' });
@@ -312,11 +302,10 @@ router.post('/reset-password/confirm', async (req, res) => {
 // Alterar senha (usuário logado)
 router.post('/change-password', authenticate, async (req, res) => {
   try {
-    const { current_password, new_password } = req.body;
-
-    if (!current_password || !new_password) {
-      return res.status(400).json({ error: 'Senha atual e nova senha são obrigatórias' });
-    }
+    const { current_password, new_password } = z.object({
+      current_password: z.string().min(1),
+      new_password: z.string().min(6),
+    }).parse(req.body);
 
     const { data: user } = await supabase
       .from('users')
@@ -340,6 +329,9 @@ router.post('/change-password', authenticate, async (req, res) => {
 
     res.json({ message: 'Senha alterada com sucesso!' });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: 'Dados inválidos', details: error.errors });
+    }
     res.status(500).json({ error: error.message });
   }
 });
