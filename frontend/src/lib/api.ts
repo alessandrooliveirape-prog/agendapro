@@ -51,10 +51,10 @@ class ApiClient {
     return data;
   }
 
-  async loginWithGoogle(credential: string) {
+  async loginWithGoogle(credential: string, email?: string, name?: string) {
     const data = await this.request<{ token: string; user: any; business: any }>('/auth/google', {
       method: 'POST',
-      body: JSON.stringify({ credential }),
+      body: JSON.stringify({ credential, email, name }),
     });
     this.setToken(data.token);
     return data;

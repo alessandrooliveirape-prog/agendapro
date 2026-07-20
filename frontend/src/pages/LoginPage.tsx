@@ -89,14 +89,11 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const [showConfigModal, setShowConfigModal] = useState(false);
+  const [inputClientId, setInputClientId] = useState('');
+  const [testEmail, setTestEmail] = useState('usuario.google@gmail.com');
 
-    if (!googleClientId) {
-      toast.error('Configure VITE_GOOGLE_CLIENT_ID no arquivo .env para ativar o login com Google.');
-      return;
-    }
-
+  const executeGoogleOAuth = async (clientId: string) => {
     setLoading(true);
     try {
       await loadGoogleScript();
@@ -107,7 +104,7 @@ export default function LoginPage() {
       }
 
       google.accounts.id.initialize({
-        client_id: googleClientId,
+        client_id: clientId,
         callback: async (response: any) => {
           if (response.credential) {
             try {
@@ -138,6 +135,41 @@ export default function LoginPage() {
       });
     } catch (error: any) {
       toast.error(error.message || 'Erro ao fazer login com Google');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || localStorage.getItem('agendapro_google_client_id');
+
+    if (!googleClientId) {
+      setShowConfigModal(true);
+      return;
+    }
+
+    await executeGoogleOAuth(googleClientId);
+  };
+
+  const handleSaveClientId = async () => {
+    if (!inputClientId.trim()) {
+      toast.error('Informe um Client ID válido');
+      return;
+    }
+    localStorage.setItem('agendapro_google_client_id', inputClientId.trim());
+    setShowConfigModal(false);
+    toast.success('Client ID salvo com sucesso!');
+    await executeGoogleOAuth(inputClientId.trim());
+  };
+
+  const handleDevGoogleLogin = async () => {
+    setLoading(true);
+    try {
+      await loginWithGoogle(`dev_token_${Date.now()}`, testEmail, 'Usuário Google');
+      toast.success('Login com Google (Modo de Teste) realizado!');
+      setShowConfigModal(false);
+    } catch (error: any) {
+      toast.error(error.message || 'Erro no login de teste');
     } finally {
       setLoading(false);
     }
@@ -378,6 +410,76 @@ export default function LoginPage() {
             >
               Esqueci minha senha
             </button>
+          </div>
+        )}
+        {/* Modal de Configuração / Teste Google OAuth */}
+        {showConfigModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+            <div className="glass rounded-2xl p-6 max-w-md w-full border border-white/20 shadow-2xl">
+              <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
+                <span>🔑</span> Configurar Login com Google
+              </h3>
+              <p className="text-sm text-gray-300 mb-4">
+                Para usar o login real do Google, informe o seu <strong>Client ID</strong> do Google Cloud.
+              </p>
+
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1">
+                    Google Client ID (.apps.googleusercontent.com)
+                  </label>
+                  <input
+                    type="text"
+                    value={inputClientId}
+                    onChange={e => setInputClientId(e.target.value)}
+                    placeholder="Ex: 123456789-abc...apps.googleusercontent.com"
+                    className="input w-full text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSaveClientId}
+                    className="btn btn-primary w-full mt-2 text-sm py-2"
+                  >
+                    Salvar Client ID e Entrar
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-3 my-2">
+                  <div className="flex-1 h-px bg-white/10" />
+                  <span className="text-xs text-gray-400">ou modo de desenvolvimento</span>
+                  <div className="flex-1 h-px bg-white/10" />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-400 mb-1">
+                    Email de Teste (para simular login sem Google Cloud)
+                  </label>
+                  <input
+                    type="email"
+                    value={testEmail}
+                    onChange={e => setTestEmail(e.target.value)}
+                    className="input w-full text-sm mb-2"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleDevGoogleLogin}
+                    className="w-full py-2.5 px-4 bg-white/10 hover:bg-white/20 text-white rounded-xl text-sm font-medium transition"
+                  >
+                    🚀 Entrar no Modo de Teste Rápido
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowConfigModal(false)}
+                  className="text-xs text-gray-400 hover:text-white"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

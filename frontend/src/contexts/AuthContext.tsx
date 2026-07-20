@@ -20,7 +20,7 @@ interface AuthContextType {
   business: Business | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  loginWithGoogle: (credential: string) => Promise<void>;
+  loginWithGoogle: (credential: string, email?: string, name?: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -54,8 +54,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setBusiness(data.business);
   };
 
-  const loginWithGoogle = async (credential: string) => {
-    const data = await api.loginWithGoogle(credential);
+  const loginWithGoogle = async (credential: string, email?: string, name?: string) => {
+    const data = await api.loginWithGoogle(credential, email, name);
     setUser(data.user);
     setBusiness(data.business);
   };
