@@ -3,8 +3,31 @@ import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
 import toast from 'react-hot-toast';
 
+const loadGoogleScript = (): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    if ((window as any).google?.accounts?.id) {
+      resolve();
+      return;
+    }
+    const existingScript = document.getElementById('google-jssdk');
+    if (existingScript) {
+      existingScript.addEventListener('load', () => resolve());
+      existingScript.addEventListener('error', (e) => reject(e));
+      return;
+    }
+    const script = document.createElement('script');
+    script.id = 'google-jssdk';
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    script.onerror = (e) => reject(e);
+    document.body.appendChild(script);
+  });
+};
+
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const [mode, setMode] = useState<'login' | 'register' | 'reset'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -67,13 +90,52 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = async () => {
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+    if (!googleClientId) {
+      toast.error('Configure VITE_GOOGLE_CLIENT_ID no arquivo .env para ativar o login com Google.');
+      return;
+    }
+
     setLoading(true);
     try {
-      // Google OAuth real seria integrado aqui via @react-oauth/google ou similar
-      // Por enquanto, desabilitado com mensagem informativa
-      toast.error('Login com Google será disponível em breve. Use email e senha.');
-      setLoading(false);
-      return;
+      await loadGoogleScript();
+      const google = (window as any).google;
+
+      if (!google?.accounts?.id) {
+        throw new Error('Não foi possível carregar o serviço do Google');
+      }
+
+      google.accounts.id.initialize({
+        client_id: googleClientId,
+        callback: async (response: any) => {
+          if (response.credential) {
+            try {
+              setLoading(true);
+              await loginWithGoogle(response.credential);
+              toast.success('Login com Google realizado com sucesso!');
+            } catch (err: any) {
+              toast.error(err.message || 'Erro ao autenticar com o Google');
+            } finally {
+              setLoading(false);
+            }
+          }
+        },
+      });
+
+      google.accounts.id.prompt((notification: any) => {
+        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          const parent = document.createElement('div');
+          parent.style.display = 'none';
+          document.body.appendChild(parent);
+          google.accounts.id.renderButton(parent, { theme: 'outline', size: 'large' });
+          const btn = parent.querySelector('div[role=button]') as HTMLElement | null;
+          if (btn) btn.click();
+          setTimeout(() => {
+            if (parent.parentNode) parent.parentNode.removeChild(parent);
+          }, 5000);
+        }
+      });
     } catch (error: any) {
       toast.error(error.message || 'Erro ao fazer login com Google');
     } finally {

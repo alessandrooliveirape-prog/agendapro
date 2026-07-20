@@ -20,6 +20,7 @@ interface AuthContextType {
   business: Business | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: (credential: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -53,6 +54,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setBusiness(data.business);
   };
 
+  const loginWithGoogle = async (credential: string) => {
+    const data = await api.loginWithGoogle(credential);
+    setUser(data.user);
+    setBusiness(data.business);
+  };
+
   const logout = () => {
     api.logout();
     setUser(null);
@@ -60,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, business, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, business, loading, login, loginWithGoogle, logout }}>
       {children}
     </AuthContext.Provider>
   );
