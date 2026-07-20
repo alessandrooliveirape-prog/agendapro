@@ -30,10 +30,10 @@ Frontend dev server proxies `/api` to `localhost:3000` automatically (`frontend/
 ## Frontend
 
 - **Entry**: `frontend/src/main.tsx`
-- **API client**: `frontend/src/lib/api.ts` — hardcoded `API_BASE` pointing to Vercel. For local development, change this to `http://localhost:3000/api` or rely on the Vite proxy (update `API_BASE` to `/api`).
+- **API client**: `frontend/src/lib/api.ts` — uses `VITE_API_URL` env var, defaults to `/api` (Vite proxy). For production, set `VITE_API_URL` to your backend URL (e.g. `https://your-backend.vercel.app/api`).
 - **Tailwind 4**: Uses `@tailwindcss/vite` plugin. No `tailwind.config.js` — config is done via CSS `@theme` directives in source files.
 - **Auth context**: `frontend/src/contexts/AuthContext.tsx`
-- **Routing**: `react-router-dom` with nested routes under a `Layout` wrapper, ErrorBoundary at root, admin route protected by role check
+- **Routing**: `react-router-dom` with nested routes under a `Layout` wrapper, ErrorBoundary at root, admin route protected by role check. All routes are in Portuguese (`/agenda`, `/servicos`, `/profissionais`, etc.).
 
 ## Commands
 
@@ -44,14 +44,14 @@ cp .env.example .env          # then fill in Supabase credentials
 npm run db:setup              # or paste schema.sql into Supabase SQL Editor manually
 npm run db:seed               # populate test data
 npm run dev                   # starts on :3000
-npm run test                  # run all backend tests (45 tests)
+npm run test                  # run all backend tests
 npm run test:watch            # run tests in watch mode
 
 # Frontend
 cd frontend && npm install
-npm run dev                   # starts on :5173, proxies /api to :3000
+npm run dev                   # starts on :5173 with --host, proxies /api to :3000
 npm run build                 # production build to dist/
-npm run test                  # run all frontend tests (8 tests)
+npm run test                  # run all frontend tests
 npm run test:watch            # run tests in watch mode
 ```
 
@@ -59,8 +59,9 @@ npm run test:watch            # run tests in watch mode
 
 Both backend and frontend use **Vitest**. Tests run against the in-memory mock database (no real Supabase needed).
 
-- **Backend tests** (`backend/src/__tests__/`): auth routes, services CRUD, appointments CRUD, public routes, mock database query builder (45 tests)
-- **Frontend tests** (`frontend/src/__tests__/`): API client token management, App routing/404/ErrorBoundary, SubscriptionContext (8 tests)
+- **Backend tests** (`backend/src/__tests__/`): auth routes, services CRUD, appointments CRUD, public routes, mock database query builder
+- **Frontend tests** (`frontend/src/__tests__/`): API client token management, App routing/404/ErrorBoundary, SubscriptionContext
+- **Test helper** (`backend/src/__tests__/helper.js`): sets `SUPABASE_URL` to placeholder before any imports to force mock mode. Exports `TEST_TOKEN` for authenticated requests.
 
 ## Environment
 
@@ -72,5 +73,10 @@ Both backend and frontend use **Vitest**. Tests run against the in-memory mock d
 
 1. **`app/` is legacy.** The React frontend (`frontend/`) is the active admin panel. `app/index.html` is an older static version.
 2. **Mock database is silent.** The server logs "Modo Mock" once at startup but otherwise behaves identically. If you see unexpected missing data, check whether `.env` is configured.
-3. **WhatsApp integration** uses Evolution API (self-hosted via docker-compose) or Z-API. The WhatsApp config in `backend/src/config/whatsapp.js` is separate from the main app database.
-4. **Backend port** defaults to 3000, configurable via `PORT` env var.
+3. **WhatsApp env var mismatch.** `.env.example` has `WHATSAPP_TOKEN` but the code in `backend/src/config/whatsapp.js` reads `WHATSAPP_API_KEY`. If WhatsApp messages don't send, check which var is actually set.
+4. **No lint, format, or typecheck tooling.** There is no ESLint, Prettier, or strict tsconfig configured. `npm test` is the only automated quality gate.
+5. **Backend port** defaults to 3000, configurable via `PORT` env var.
+6. **Webhook secrets.** Set `STRIPE_WEBHOOK_SECRET` and `MERCADOPAGO_WEBHOOK_SECRET` in backend `.env` for production. Without them, webhooks skip signature verification.
+7. **Cron job.** Reminders auto-send every 15 min (8h-20h) via `node-cron` in `server.js`. Only runs while the server is alive.
+8. **Public booking page.** `/agendar/:slug` is a public React page (no auth). The API URL is read from `VITE_API_URL` env var at build time.
+9. **Deploy.** `docker-compose.prod.yml` runs backend + frontend + Postgres. Backend reads `backend/.env`. Frontend is served via nginx with `/api` reverse proxy.

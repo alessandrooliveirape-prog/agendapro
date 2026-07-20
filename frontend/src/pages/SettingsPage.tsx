@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { useAuth } from '../contexts/AuthContext';
-import { Save, Copy, ExternalLink } from 'lucide-react';
+import { Save, Copy, ExternalLink, Bell, BellOff } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { usePushNotifications } from '../hooks/usePushNotifications';
 
 export default function SettingsPage() {
   const { business } = useAuth();
@@ -371,12 +372,52 @@ export default function SettingsPage() {
         </div>
       </div>
 
+      {/* Notificações Push */}
+      <NotificationsSection />
+
       {/* Alterar Senha */}
       <div className="glass rounded-2xl p-6">
         <h2 className="text-lg font-semibold mb-4">Alterar Senha</h2>
         <p className="text-gray-400 text-sm mb-6">Mantenha sua conta segura com uma senha forte.</p>
         <ChangePasswordForm />
       </div>
+    </div>
+  );
+}
+
+function NotificationsSection() {
+  const { isSupported, isSubscribed, loading, subscribe, unsubscribe } = usePushNotifications();
+
+  if (!isSupported) return null;
+
+  return (
+    <div className="glass rounded-2xl p-6">
+      <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <Bell size={20} className="text-indigo-400" /> Notificações Push
+      </h2>
+      <p className="text-gray-400 text-sm mb-4">
+        Receba alertas no celular quando um agendamento for criado ou atualizado.
+      </p>
+      <button
+        onClick={isSubscribed ? unsubscribe : subscribe}
+        disabled={loading}
+        className={`btn ${isSubscribed ? 'btn-danger' : 'btn-primary'}`}
+      >
+        {loading ? (
+          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+        ) : isSubscribed ? (
+          <>
+            <BellOff size={18} /> Desativar Notificações
+          </>
+        ) : (
+          <>
+            <Bell size={18} /> Ativar Notificações
+          </>
+        )}
+      </button>
+      {isSubscribed && (
+        <p className="text-green-400 text-sm mt-2">Notificações push ativadas</p>
+      )}
     </div>
   );
 }

@@ -12,6 +12,8 @@ const mockData = {
   clients: [],
   appointments: [],
   time_blocks: [],
+  units: [],
+  push_subscriptions: [],
 };
 
 let supabaseInstance;

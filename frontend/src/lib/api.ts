@@ -1,4 +1,4 @@
-const API_BASE = 'https://backend-five-gamma-27.vercel.app/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 class ApiClient {
   private token: string | null = null;

@@ -4,6 +4,7 @@ import { supabase } from '../config/database.js';
 import { authenticate } from '../middleware/auth.js';
 import { sendWhatsAppMessage, formatConfirmation, formatAppointmentReminder } from '../config/whatsapp.js';
 import { sendEmail, appointmentReminderEmail } from '../config/email.js';
+import { sendPushNotification } from './notifications.js';
 
 const router = Router();
 
@@ -158,6 +159,13 @@ router.post('/', async (req, res) => {
       );
     }
 
+    // Enviar push notification
+    sendPushNotification(req.businessId, {
+      title: 'Novo agendamento',
+      body: `${data.client_name} agendou ${service.name} para ${data.time}`,
+      url: '/agenda',
+    });
+
     res.status(201).json(appointment);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -181,6 +189,16 @@ router.patch('/:id/status', async (req, res) => {
       .single();
 
     if (error) throw error;
+
+    // Enviar push notification sobre mudança de status
+    const statusLabels = { confirmed: 'confirmado', completed: 'concluído', cancelled: 'cancelado', no_show: 'não compareceu' };
+    if (statusLabels[status]) {
+      sendPushNotification(req.businessId, {
+        title: `Agendamento ${statusLabels[status]}`,
+        body: `${appointment.client_name} — ${appointment.service_name}`,
+        url: '/agenda',
+      });
+    }
 
     // Se cancelou, decrementar total de agendamentos do cliente
     if (status === 'cancelled' && appointment.client_id) {

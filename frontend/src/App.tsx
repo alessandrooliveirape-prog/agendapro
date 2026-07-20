@@ -17,6 +17,8 @@ import PricingPage from './pages/PricingPage';
 import PaymentHistoryPage from './pages/PaymentHistoryPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import BookingPage from './pages/BookingPage';
+import UnitsPage from './pages/UnitsPage';
 import { Component, type ReactNode } from 'react';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
@@ -91,6 +93,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={user ? <Navigate to="/" /> : <LoginPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/agendar/:slug" element={<BookingPage />} />
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<DashboardPage />} />
         <Route path="agenda" element={<AgendaPage />} />
@@ -101,6 +104,7 @@ function AppRoutes() {
         <Route path="relatorios" element={<ReportsPage />} />
         <Route path="pagamentos" element={<PaymentsPage />} />
         <Route path="recorrentes" element={<RecurringPage />} />
+        <Route path="unidades" element={<UnitsPage />} />
         <Route path="planos" element={<PricingPage />} />
         <Route path="historico-pagamentos" element={<PaymentHistoryPage />} />
         <Route path="admin" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />

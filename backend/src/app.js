@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import { apiLimiter } from './middleware/rateLimit.js';
 
 import { authRoutes } from './routes/auth.js';
 import { businessRoutes } from './routes/business.js';
@@ -17,6 +18,8 @@ import { reportRoutes } from './routes/reports.js';
 import { subscriptionRoutes } from './routes/subscriptions.js';
 import { pixRoutes } from './routes/pix.js';
 import { adminRoutes } from './routes/admin.js';
+import { notificationRoutes } from './routes/notifications.js';
+import { unitRoutes } from './routes/units.js';
 
 const app = express();
 
@@ -24,6 +27,7 @@ const app = express();
 app.use(helmet());
 app.use(cors({ origin: process.env.FRONTEND_URL || '*', credentials: true }));
 app.use(express.json({ limit: '1mb' }));
+app.use('/api', apiLimiter);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -45,6 +49,8 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/pix', pixRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/units', unitRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {

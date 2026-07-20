@@ -2,46 +2,9 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { supabase } from '../config/database.js';
 import { authenticate } from '../middleware/auth.js';
+import crypto from 'crypto';
 
 const router = Router();
-
-// Criar sessão de pagamento (Stripe Checkout)
-router.post('/create-checkout', authenticate, async (req, res) => {
-  try {
-    const { appointment_id, amount, description } = z.object({
-      appointment_id: z.string().uuid(),
-      amount: z.number().positive(),
-      description: z.string().optional(),
-    }).parse(req.body);
-
-    // Em produção, aqui integraria com Stripe
-    // Por enquanto, simulamos o pagamento
-    const { data: appointment, error } = await supabase
-      .from('appointments')
-      .update({
-        payment_status: 'paid',
-        payment_method: 'online',
-        notes: `${description || 'Pagamento online'} - R$${amount}`
-      })
-      .eq('id', appointment_id)
-      .eq('business_id', req.businessId)
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    res.json({
-      success: true,
-      appointment,
-      message: 'Pagamento processado com sucesso'
-    });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Dados inválidos', details: error.errors });
-    }
-    res.status(500).json({ error: error.message });
-  }
-});
 
 // Criar pagamento via Mercado Pago
 router.post('/create-mercadopago', authenticate, async (req, res) => {
@@ -160,17 +123,26 @@ router.post('/create-stripe', authenticate, async (req, res) => {
 // Webhook do Mercado Pago
 router.post('/webhook/mercadopago', async (req, res) => {
   try {
+    // Verificar assinatura do Mercado Pago
+    const signature = req.headers['x-signature'];
+    const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
+
+    if (secret && signature) {
+      const body = JSON.stringify(req.body);
+      const expectedSig = crypto.createHmac('sha256', secret).update(body).digest('hex');
+      if (signature !== expectedSig) {
+        console.warn('Mercado Pago webhook signature mismatch');
+        return res.status(401).json({ error: 'Assinatura inválida' });
+      }
+    }
+
     const { type, data } = req.body;
     console.log('Mercado Pago webhook:', type, data);
 
     if (type === 'payment') {
-      const paymentId = data.id;
-
-      // Buscar pagamento via external_reference (ID do appointment)
       const appointmentId = req.body.external_reference;
 
-      if (appointmentId) {
-        // Atualizar status do pagamento do agendamento
+      if (appointmentId && !appointmentId.startsWith('sub_')) {
         await supabase
           .from('appointments')
           .update({ payment_status: 'paid', payment_method: 'mercadopago' })
@@ -181,13 +153,11 @@ router.post('/webhook/mercadopago', async (req, res) => {
     // Webhook de assinatura (upgrade)
     if (type === 'payment' && req.body.external_reference?.startsWith('sub_')) {
       const parts = req.body.external_reference.split('_');
-      // Format: sub_{businessId}_{plan} where businessId is a UUID (no underscores)
       const plan = parts[parts.length - 1];
       const businessId = parts.slice(1, -1).join('_');
       const paymentStatus = req.body.status;
 
       if (paymentStatus === 'approved') {
-        // Ativar plano
         const planInfo = { basic: 30, pro: 30, business: 30 };
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + (planInfo[plan] || 30));
@@ -214,18 +184,52 @@ router.post('/webhook/mercadopago', async (req, res) => {
 // Webhook do Stripe
 router.post('/webhook/stripe', async (req, res) => {
   try {
+    // Verificar assinatura do Stripe
+    const sigHeader = req.headers['stripe-signature'];
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    if (webhookSecret && sigHeader) {
+      const timestamp = sigHeader.split(',')[0].split('=')[1];
+      const signature = sigHeader.split(',')[1].split('=')[1];
+      const payload = `${timestamp}.${JSON.stringify(req.body)}`;
+      const expectedSig = crypto.createHmac('sha256', webhookSecret).update(payload).digest('hex');
+
+      if (signature !== expectedSig) {
+        console.warn('Stripe webhook signature mismatch');
+        return res.status(401).json({ error: 'Assinatura inválida' });
+      }
+    }
+
     const { type, data } = req.body;
 
     if (type === 'checkout.session.completed') {
-      const { appointment_id } = data.object.metadata;
-      await supabase
-        .from('appointments')
-        .update({ payment_status: 'paid', payment_method: 'stripe' })
-        .eq('id', appointment_id);
+      const metadata = data.object.metadata;
+      if (metadata?.appointment_id) {
+        await supabase
+          .from('appointments')
+          .update({ payment_status: 'paid', payment_method: 'stripe' })
+          .eq('id', metadata.appointment_id);
+      }
+
+      // Handle subscription upgrades
+      if (metadata?.business_id && metadata?.plan) {
+        const planInfo = { basic: 30, pro: 30, business: 30 };
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + (planInfo[metadata.plan] || 30));
+
+        await supabase
+          .from('businesses')
+          .update({
+            subscription_plan: metadata.plan,
+            subscription_expires_at: expiresAt.toISOString(),
+          })
+          .eq('id', metadata.business_id);
+      }
     }
 
     res.status(200).send('OK');
   } catch (error) {
+    console.error('Erro no webhook Stripe:', error);
     res.status(200).send('OK');
   }
 });

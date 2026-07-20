@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { supabase } from '../config/database.js';
+import { publicBookingLimiter } from '../middleware/rateLimit.js';
 
 const router = Router();
 
@@ -169,7 +170,7 @@ router.get('/:slug/available-times', async (req, res) => {
 });
 
 // Criar agendamento público (cliente agenda sozinho)
-router.post('/:slug/book', async (req, res) => {
+router.post('/:slug/book', publicBookingLimiter, async (req, res) => {
   try {
     const data = z.object({
       service_id: z.string().uuid(),

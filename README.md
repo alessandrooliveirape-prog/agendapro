@@ -160,9 +160,9 @@ WHATSAPP_TOKEN=seu_token
 
 ## 📋 Próximos Passos
 
-- [ ] Integrar pagamento (Stripe/Mercado Pago)
-- [ ] Dashboard completo no React
-- [ ] App mobile (PWA)
-- [ ] Notificações push
-- [ ] Relatórios avançados
-- [ ] Multi-unidades
+- [x] Integrar pagamento (Stripe/Mercado Pago)
+- [x] Dashboard completo no React
+- [x] App mobile (PWA)
+- [x] Notificações push
+- [x] Relatórios avançados
+- [x] Multi-unidades

@@ -18,6 +18,7 @@ import {
   Crown,
   History,
   Shield,
+  Building2,
 } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -28,6 +29,7 @@ const navItems = [
   { path: '/servicos', label: 'Serviços', icon: Scissors },
   { path: '/profissionais', label: 'Profissionais', icon: UserCog },
   { path: '/clientes', label: 'Clientes', icon: Users },
+  { path: '/unidades', label: 'Unidades', icon: Building2 },
   { path: '/recorrentes', label: 'Recorrentes', icon: Repeat },
   { path: '/pagamentos', label: 'Pagamentos', icon: DollarSign },
   { path: '/historico-pagamentos', label: 'Histórico', icon: History },

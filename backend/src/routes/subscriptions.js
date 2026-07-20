@@ -278,36 +278,6 @@ router.post('/cancel', authenticate, async (req, res) => {
   }
 });
 
-// Ativar plano após pagamento confirmado (requer auth - só o próprio negócio)
-router.post('/activate', authenticate, async (req, res) => {
-  try {
-    const { plan } = z.object({ plan: z.enum(['basic', 'pro', 'business']) }).parse(req.body);
-
-    const planInfo = PLANS[plan];
-    if (!planInfo) {
-      return res.status(400).json({ error: 'Plano inválido' });
-    }
-
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + planInfo.duration_days);
-
-    const { error } = await supabase
-      .from('businesses')
-      .update({
-        subscription_plan: plan,
-        subscription_expires_at: expiresAt.toISOString(),
-      })
-      .eq('id', req.businessId);
-
-    if (error) throw error;
-
-    res.json({ success: true, message: `Plano ${planInfo.name} ativado` });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Dados inválidos', details: error.errors });
-    }
-    res.status(500).json({ error: error.message });
-  }
-});
+// Ativar plano - removido endpoint de bypass. Ativação só via webhooks de pagamento.
 
 export { router as subscriptionRoutes };

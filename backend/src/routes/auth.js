@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { z } from 'zod';
 import { supabase } from '../config/database.js';
 import { generateToken, authenticate } from '../middleware/auth.js';
+import { authLimiter } from '../middleware/rateLimit.js';
 
 const router = Router();
 
@@ -22,7 +23,7 @@ const loginSchema = z.object({
 });
 
 // Registro
-router.post('/register', async (req, res) => {
+router.post('/register', authLimiter, async (req, res) => {
   try {
     const data = registerSchema.parse(req.body);
 
@@ -83,7 +84,7 @@ router.post('/register', async (req, res) => {
 });
 
 // Login
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
   try {
     const { email, password } = loginSchema.parse(req.body);
 
@@ -124,35 +125,55 @@ router.post('/login', async (req, res) => {
 });
 
 // Login com Google
-router.post('/google', async (req, res) => {
+router.post('/google', authLimiter, async (req, res) => {
   try {
-    const { email, name, google_id, avatar_url } = req.body;
+    const { credential, email, name, avatar_url } = req.body;
 
-    if (!email || !google_id) {
-      return res.status(400).json({ error: 'Dados do Google incompletos' });
+    if (!credential) {
+      return res.status(400).json({ error: 'Credencial do Google obrigatória' });
     }
+
+    // Verificar token com Google
+    let verifiedEmail, verifiedName;
+    try {
+      const googleRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+      if (!googleRes.ok) {
+        return res.status(401).json({ error: 'Credencial do Google inválida' });
+      }
+      const googleData = await googleRes.json();
+      verifiedEmail = googleData.email;
+      verifiedName = googleData.name || name;
+      if (!verifiedEmail) {
+        return res.status(401).json({ error: 'Email não verificado pelo Google' });
+      }
+    } catch {
+      return res.status(401).json({ error: 'Falha ao verificar credencial com Google' });
+    }
+
+    const finalEmail = verifiedEmail;
+    const finalName = verifiedName || name;
 
     // Verificar se o usuário já existe
     let { data: user } = await supabase
       .from('users')
       .select('*, businesses(id, name, slug, subscription_plan)')
-      .eq('email', email)
+      .eq('email', finalEmail)
       .single();
 
     if (!user) {
       // Criar novo usuário e negócio
       const businessId = crypto.randomUUID();
       const userId = crypto.randomUUID();
-      const slug = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const slug = finalEmail.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-');
 
       // Criar negócio
       await supabase
         .from('businesses')
         .insert({
           id: businessId,
-          name: name || 'Meu Negócio',
+          name: finalName || 'Meu Negócio',
           slug: slug + '-' + Date.now(),
-          owner_email: email,
+          owner_email: finalEmail,
         });
 
       // Criar usuário
@@ -161,8 +182,8 @@ router.post('/google', async (req, res) => {
         .insert({
           id: userId,
           business_id: businessId,
-          name: name,
-          email: email,
+          name: finalName,
+          email: finalEmail,
           password_hash: 'google_oauth',
           role: 'owner',
           avatar_url: avatar_url,
@@ -181,7 +202,7 @@ router.post('/google', async (req, res) => {
 
       return res.json({
         token,
-        user: { id: userId, name, email, role: 'owner' },
+        user: { id: userId, name: finalName, email: finalEmail, role: 'owner' },
         business,
         isNewUser: true,
       });
@@ -229,7 +250,7 @@ router.get('/me', authenticate, async (req, res) => {
 });
 
 // Solicitar redefinição de senha
-router.post('/reset-password', async (req, res) => {
+router.post('/reset-password', authLimiter, async (req, res) => {
   try {
     const { email } = req.body;
 

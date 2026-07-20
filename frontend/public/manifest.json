@@ -1,0 +1,20 @@
+{
+  "name": "AgendaPro — Sistema de Agendamento",
+  "short_name": "AgendaPro",
+  "description": "Sistema de agendamento para profissionais de serviços",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#030712",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "categories": ["business", "productivity"],
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
