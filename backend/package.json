@@ -13,6 +13,7 @@
     "db:seed": "node src/database/seed.js"
   },
   "dependencies": {
+    "@sentry/node": "^8.0.0",
     "@supabase/supabase-js": "^2.49.4",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",

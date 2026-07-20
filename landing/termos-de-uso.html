@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Termos de Uso — AgendaPro</title>
+  <meta name="description" content="Termos de uso do AgendaPro — sistema de agendamento para profissionais de beleza, saúde e bem-estar.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0A0A0B;
+      --bg-elevated: #111113;
+      --bg-card: #18181B;
+      --surface: #1E1E22;
+      --border: rgba(255,255,255,0.06);
+      --border-hover: rgba(255,255,255,0.12);
+      --text-primary: #F4F4F5;
+      --text-secondary: #A1A1AA;
+      --text-muted: #71717A;
+      --accent: #6366F1;
+      --accent-glow: rgba(99,102,241,0.15);
+      --accent-gradient: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #A855F7 100%);
+      --green: #22C55E;
+      --green-glow: rgba(34,197,94,0.12);
+      --yellow: #EAB308;
+      --red: #EF4444;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --radius-xs: 6px;
+      --font-body: 'Inter', system-ui, sans-serif;
+      --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+      --texture-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: var(--texture-noise);
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.5;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .t-body { font-size: 1.05rem; color: var(--text-secondary); }
+    .t-small { font-size: 0.875rem; color: var(--text-muted); }
+    .t-label {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .gradient-text {
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 1rem;
+      padding: 16px 32px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--accent-gradient);
+      color: white;
+      box-shadow: 0 0 0 1px rgba(99,102,241,0.3), 0 4px 16px rgba(99,102,241,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 0 1px rgba(99,102,241,0.4), 0 8px 32px rgba(99,102,241,0.35), inset 0 1px 0 rgba(255,255,255,0.2);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--border-hover);
+      color: var(--text-primary);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--accent-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: white;
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+
+    .logo-text {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--text-primary);
+    }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(10,10,11,0.8);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .topbar .btn { padding: 10px 20px; font-size: 0.85rem; }
+
+    .page-header {
+      padding: 140px 24px 60px;
+      text-align: center;
+    }
+
+    .page-header h1 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+    }
+
+    .page-header .date {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .legal-content {
+      padding: 40px 0 120px;
+    }
+
+    .legal-content h2 {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 1.4rem;
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      margin-top: 48px;
+      margin-bottom: 16px;
+    }
+
+    .legal-content h3 {
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--text-primary);
+      margin-top: 32px;
+      margin-bottom: 12px;
+    }
+
+    .legal-content p {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: 16px;
+    }
+
+    .legal-content ul {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 16px;
+    }
+
+    .legal-content li {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+      padding-left: 24px;
+      position: relative;
+      margin-bottom: 8px;
+    }
+
+    .legal-content li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 12px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .plan-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+
+    .plan-table th {
+      background: var(--bg-card);
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-align: left;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
+    }
+
+    .plan-table td {
+      padding: 14px 20px;
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .plan-table tr:last-child td { border-bottom: none; }
+
+    .plan-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    footer .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    footer .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.3s;
+    }
+
+    footer .footer-links a:hover { color: var(--text-primary); }
+
+    footer p { font-size: 0.8rem; color: var(--text-muted); }
+
+    @media (max-width: 768px) {
+      .topbar .btn { padding: 8px 16px; font-size: 0.8rem; }
+      .plan-table th, .plan-table td { padding: 10px 14px; font-size: 0.85rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <a href="index.html" class="logo">
+      <div class="logo-mark">A</div>
+      <span class="logo-text">Agenda<span class="gradient-text">Pro</span></span>
+    </a>
+    <a href="https://agendapro.vercel.app/login" class="btn btn-primary">Entrar</a>
+  </header>
+
+  <section class="page-header">
+    <div class="container">
+      <p class="t-label">Jurídico</p>
+      <h1>Termos de <span class="gradient-text">Uso</span></h1>
+      <p class="date">Última atualização: Julho de 2026</p>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="legal-content">
+
+      <h2>1. Aceitação dos Termos</h2>
+      <p>Ao acessar ou utilizar o AgendaPro ("Serviço"), você concorda com estes Termos de Uso. Se não concordar com algum dos termos, não utilize o Serviço. Reservamo-nos o direito de alterar estes termos a qualquer momento, sendo que as alterações entrarão em vigor imediatamente após a publicação.</p>
+
+      <h2>2. Descrição do Serviço</h2>
+      <p>O AgendaPro é uma plataforma SaaS (Software como um Serviço) de agendamento online voltada para profissionais de beleza, saúde e bem-estar — como barbeiros, dentistas, personal trainers e outros prestadores de serviços.</p>
+      <p>O Serviço inclui, entre outras funcionalidades:</p>
+      <ul>
+        <li>Agendamento online com link público para clientes</li>
+        <li>Lembretes automáticos via WhatsApp</li>
+        <li>Painel de controle e relatórios</li>
+        <li>Integração com processadores de pagamento (Stripe, Mercado Pago)</li>
+        <li>Gestão de profissionais, serviços e unidades</li>
+      </ul>
+
+      <h2>3. Cadastro e Responsabilidades da Conta</h2>
+      <p>Para utilizar o Serviço, você deve criar uma conta fornecendo informações verdadeiras, completas e atualizadas. Você é responsável por:</p>
+      <ul>
+        <li>Manter a confidencialidade de suas credenciais de acesso</li>
+        <li>Todas as atividades realizadas sob sua conta</li>
+        <li>Notificar imediatamente o AgendaPro sobre qualquer uso não autorizado</li>
+        <li>Ser maior de 18 anos ou ter capacidade legal para celebrar contratos</li>
+      </ul>
+      <p>Uma pessoa jurídica pode ter múltiplas contas vinculadas ao mesmo negócio, mediante os planos contratados.</p>
+
+      <h2>4. Política de Uso Aceitável</h2>
+      <p>Ao utilizar o Serviço, você concorda em NÃO:</p>
+      <ul>
+        <li>Usar o Serviço para qualquer finalidade ilegal ou não autorizada</li>
+        <li>Transmitir vírus, malware ou qualquer código de natureza destructiva</li>
+        <li>Tentar acessar, manipular ou destruir contas de outros usuários</li>
+        <li>Realizar engenharia reversa, descompilar ou desmontar qualquer parte do Serviço</li>
+        <li>Usar o Serviço para enviar spam, mensagens em massa ou comunicações não solicitadas</li>
+        <li>Interferir ou interromper a infraestrutura do Serviço ou servidores conectados</li>
+        <li>Usar bots, scrapers ou outros meios automatizados para acessar o Serviço</li>
+      </ul>
+
+      <h2>5. Assinatura e Pagamento</h2>
+      <p>O AgendaPro oferece diferentes planos de assinatura. Os valores e condições são os seguintes:</p>
+
+      <table class="plan-table">
+        <thead>
+          <tr>
+            <th>Plano</th>
+            <th>Preço</th>
+            <th>Período</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Teste Grátis</td>
+            <td>Gratuito</td>
+            <td>14 dias</td>
+          </tr>
+          <tr>
+            <td>Básico</td>
+            <td>R$ 49/mês</td>
+            <td>Mensal</td>
+          </tr>
+          <tr>
+            <td>Pro</td>
+            <td>R$ 99/mês</td>
+            <td>Mensal</td>
+          </tr>
+          <tr>
+            <td>Business</td>
+            <td>R$ 199/mês</td>
+            <td>Mensal</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>As condições de pagamento incluem:</p>
+      <ul>
+        <li>Os valores são cobrados mensalmente, antecipadamente, até o início de cada ciclo de assinatura</li>
+        <li>O período de teste grátis de 14 dias não exige cartão de crédito</li>
+        <li>Ao término do período de teste, a assinatura será automaticamente interrompida, a menos que o usuário opte por um plano pago</li>
+        <li>Os preços podem ser alterados com aviso prévio de 30 dias</li>
+        <li>Pagamentos são processados via Stripe ou Mercado Pago</li>
+        <li>Todos os preços incluem impostos aplicáveis (ICMS, ISS, conforme legislação local)</li>
+      </ul>
+
+      <h3>5.1 Cancelamento</h3>
+      <p>Você pode cancelar sua assinatura a qualquer momento diretamente pelo painel de administração. O cancelamento terá efeito ao final do ciclo de faturamento atual. Não há reembolso proporcional pelo período não utilizado.</p>
+
+      <h2>6. Propriedade Intelectual</h2>
+      <p>Todo o conteúdo, código-fonte, design, marcas registradas, logotipos e materiais do AgendaPro são de propriedade exclusiva da AgendaPro ou de seus licenciadores e são protegidos por leis de propriedade intelectual.</p>
+      <p>Você mantém a propriedade de todos os dados que insere no Serviço (informações de clientes, agendamentos, etc.). Ao usar o Serviço, você concede ao AgendaPro uma licença limitada para processar esses dados exclusivamente para fornecer o Serviço.</p>
+
+      <h2>7. Limitação de Responsabilidade</h2>
+      <p>O AgendaPro é fornecido "como está" e "conforme disponível". Não garantimos que o Serviço será ininterrupto, livre de erros ou totalmente seguro.</p>
+      <p>Em nenhuma circunstância a AgendaPro será responsável por:</p>
+      <ul>
+        <li>Danos indiretos, incidentais, especiais, consequenciais ou punitivos</li>
+        <li>Perda de lucros, dados, uso ou outros prejuízos intangíveis</li>
+        <li>Interrupções do serviço, falhas de terceiros ou problemas de conectividade</li>
+        <li>Ações ou omissões de processadores de pagamento ou provedores de WhatsApp</li>
+      </ul>
+      <p>Nossa responsabilidade total não excederá o valor pago por você nos 12 meses anteriores ao evento que deu origem à reclamação.</p>
+
+      <h2>8. Disponibilidade e Suporte</h2>
+      <p>Empenhamo-nos em manter alta disponibilidade do Serviço, mas não garantimos uptime de 100%. Manutenções programadas serão comunicadas com antecedência mínima de 24h, sempre que possível.</p>
+
+      <h2>9. Rescisão</h2>
+      <p>A AgendaPro pode suspender ou encerrar sua acesso ao Serviço, imediatamente e sem aviso prévio, se você violar estes Termos de Uso. Após a rescisão:</p>
+      <ul>
+        <li>Seu direito de uso do Serviço cessa imediatamente</li>
+        <li>Seus dados serão mantidos por 30 dias para permitir a exportação</li>
+        <li>Após 30 dias, os dados serão excluídos de nossos servidores</li>
+        <li>As seções sobre Propriedade Intelectual, Limitação de Responsabilidade e Foro permanecerão vigentes</li>
+      </ul>
+
+      <h2>10. Alterações nestes Termos</h2>
+      <p>Reservamo-nos o direito de modificar estes Termos a qualquer momento. Alterações significativas serão comunicadas por e-mail ou mediante aviso no Serviço com pelo menos 30 dias de antecedência. O uso continuado do Serviço após as alterações constitui aceitação dos novos termos.</p>
+
+      <h2>11. Lei Aplicável e Foro</h2>
+      <p>Estes Termos de Uso são regidos pelas leis da República Federativa do Brasil. Fica eleito o foro da Comarca de São Paulo, Estado de São Paulo, para dirimir quaisquer questões oriundas destes Termos, com renúncia expressa a qualquer outro por mais privilegiado que seja.</p>
+
+      <h2>12. Contato</h2>
+      <p>Em caso de dúvidas sobre estes Termos de Uso, entre em contato:</p>
+      <ul>
+        <li>E-mail: <strong>agendapro1007@agendapro1007.com.br</strong></li>
+        <li>Assunto: "Termos de Uso — AgendaPro"</li>
+      </ul>
+
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-links">
+      <a href="termos-de-uso.html">Termos de Uso</a>
+      <a href="politica-de-privacidade.html">Política de Privacidade</a>
+      <a href="index.html">Voltar ao site</a>
+    </div>
+    <p>&copy; 2026 AgendaPro. Todos os direitos reservados.</p>
+  </footer>
+
+</body>
+</html>

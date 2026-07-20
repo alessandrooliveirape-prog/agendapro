@@ -1,5 +1,19 @@
 import 'dotenv/config';
 import express from 'express';
+
+// Sentry — lazy import so it doesn't break when @sentry/node is not installed
+if (process.env.SENTRY_DSN) {
+  try {
+    const Sentry = await import('@sentry/node');
+    Sentry.init({
+      dsn: process.env.SENTRY_DSN,
+      environment: process.env.NODE_ENV || 'development',
+      tracesSampleRate: 0.1,
+    });
+  } catch {
+    console.warn('SENTRY_DSN set but @sentry/node not installed — skipping Sentry');
+  }
+}
 import cors from 'cors';
 import helmet from 'helmet';
 import { apiLimiter } from './middleware/rateLimit.js';

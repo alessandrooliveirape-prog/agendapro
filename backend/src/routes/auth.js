@@ -55,6 +55,9 @@ router.post('/register', authLimiter, async (req, res) => {
     // Criar usuário
     const passwordHash = await bcrypt.hash(data.password, 10);
     const userId = crypto.randomUUID();
+    const emailVerificationToken = crypto.randomUUID();
+    const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
     const { error: userError } = await supabase
       .from('users')
       .insert({
@@ -64,14 +67,28 @@ router.post('/register', authLimiter, async (req, res) => {
         email: data.email,
         password_hash: passwordHash,
         role: 'owner',
+        email_verified: false,
+        email_verification_token: emailVerificationToken,
+        email_verification_expires: emailVerificationExpires,
       });
 
     if (userError) throw userError;
 
+    // Enviar email de verificação
+    const { sendEmail: send, sendVerificationEmail } = await import('../config/email.js');
+    const emailContent = sendVerificationEmail(data.email, emailVerificationToken);
+    const emailResult = await send(data.email, emailContent.subject, emailContent.html);
+
+    // Log verification URL in dev mode when SMTP is not configured
+    if (emailResult.sent === false) {
+      const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      console.log(`🔗 URL de verificação: ${baseUrl}/verificar-email?token=${emailVerificationToken}`);
+    }
+
     const token = generateToken(userId, businessId);
 
     res.status(201).json({
-      message: 'Conta criada com sucesso!',
+      message: 'Conta criada com sucesso! Verifique seu email para ativar sua conta.',
       token,
       business: { id: businessId, name: data.business_name, slug: data.slug },
     });
@@ -79,6 +96,50 @@ router.post('/register', authLimiter, async (req, res) => {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: 'Dados inválidos', details: error.errors });
     }
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Verificar email
+router.get('/verify-email', async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.status(400).json({ error: 'Token de verificação é obrigatório' });
+    }
+
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('id, email_verified, email_verification_expires')
+      .eq('email_verification_token', token)
+      .single();
+
+    if (error || !user) {
+      return res.status(400).json({ error: 'Token de verificação inválido' });
+    }
+
+    if (user.email_verified) {
+      return res.json({ message: 'Email já verificado. Você pode fazer login.' });
+    }
+
+    if (new Date(user.email_verification_expires) < new Date()) {
+      return res.status(400).json({ error: 'Token de verificação expirado. Solicite um novo.' });
+    }
+
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({
+        email_verified: true,
+        email_verification_token: null,
+        email_verification_expires: null,
+      })
+      .eq('id', user.id);
+
+    if (updateError) throw updateError;
+
+    res.json({ message: 'Email verificado com sucesso! Você já pode acessar sua conta.' });
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
@@ -106,16 +167,23 @@ router.post('/login', authLimiter, async (req, res) => {
 
     const token = generateToken(user.id, user.business_id);
 
-    res.json({
+    const response = {
       token,
       user: {
         id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
+        email_verified: user.email_verified,
       },
       business: user.businesses,
-    });
+    };
+
+    if (!user.email_verified) {
+      response.warning = 'Seu email ainda não foi verificado. Verifique sua caixa de entrada.';
+    }
+
+    res.json(response);
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: 'Dados inválidos', details: error.errors });
@@ -192,6 +260,7 @@ router.post('/google', authLimiter, async (req, res) => {
           password_hash: 'google_oauth',
           role: 'owner',
           avatar_url: avatar_url,
+          email_verified: true,
         });
 
       if (userError) throw userError;
@@ -240,7 +309,7 @@ router.get('/me', authenticate, async (req, res) => {
   try {
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, name, email, role, businesses(id, name, slug, subscription_plan)')
+      .select('id, name, email, role, email_verified, businesses(id, name, slug, subscription_plan)')
       .eq('id', req.userId)
       .single();
 

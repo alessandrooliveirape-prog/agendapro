@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { Calendar, Users, DollarSign, TrendingUp, Clock, AlertCircle } from 'lucide-react';
+import OnboardingModal from '../components/OnboardingModal';
 
 interface DashboardData {
   today: number;
@@ -69,6 +70,7 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-7xl mx-auto">
+      <OnboardingModal />
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Bom dia! 👋</h1>

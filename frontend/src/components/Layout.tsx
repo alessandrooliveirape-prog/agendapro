@@ -19,6 +19,7 @@ import {
   History,
   Shield,
   Building2,
+  HelpCircle,
 } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -36,6 +37,7 @@ const navItems = [
   { path: '/relatorios', label: 'Relatórios', icon: BarChart3 },
   { path: '/planos', label: 'Planos', icon: Crown },
   { path: '/configuracoes', label: 'Configurações', icon: Settings },
+  { path: '/faq', label: 'Perguntas Frequentes', icon: HelpCircle },
 ];
 
 const adminItems = [

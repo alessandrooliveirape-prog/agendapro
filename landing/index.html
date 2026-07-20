@@ -5,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AgendaPro — Pare de perder clientes por esquecimento</title>
   <meta name="description" content="Sistema de agendamento inteligente para barbeiros, dentistas e personal trainers. Lembretes automáticos via WhatsApp que eliminam faltas.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="AgendaPro">
+  <meta name="keywords" content="agendamento online, sistema de agendamento, WhatsApp lembretes, barbeiro, dentista, personal trainer, salão de beleza">
+  <meta property="og:title" content="AgendaPro — Sistema de Agendamento SaaS">
+  <meta property="og:description" content="Sistema de agendamento inteligente para profissionais de serviços. Lembretes automáticos via WhatsApp que eliminam faltas.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="pt_BR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AgendaPro — Sistema de Agendamento SaaS">
+  <meta name="twitter:description" content="Sistema de agendamento inteligente para profissionais de serviços. Lembretes automáticos via WhatsApp.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -760,7 +771,146 @@
     }
 
     .topbar .btn { padding: 10px 20px; font-size: 0.85rem; }
+
+    /* ═══════════════════════════════════════════
+       NEWSLETTER
+    ═══════════════════════════════════════════ */
+    .newsletter {
+      padding: 100px 24px;
+      text-align: center;
+    }
+
+    .newsletter-header {
+      max-width: 500px;
+      margin: 0 auto 40px;
+    }
+
+    .newsletter-header h2 { margin-bottom: 12px; }
+    .newsletter-header p { color: var(--text-secondary); font-size: 1rem; }
+
+    .newsletter-form {
+      display: flex;
+      gap: 12px;
+      max-width: 440px;
+      margin: 0 auto;
+    }
+
+    .newsletter-form input[type="email"] {
+      flex: 1;
+      padding: 14px 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .newsletter-form input[type="email"]::placeholder {
+      color: var(--text-muted);
+    }
+
+    .newsletter-form input[type="email"]:focus {
+      border-color: var(--accent);
+    }
+
+    .newsletter-form .btn {
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+      .newsletter-form {
+        flex-direction: column;
+      }
+      .newsletter-form .btn {
+        width: 100%;
+      }
+    }
+
+    /* ═══════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════ */
+    .site-footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    .site-footer .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .site-footer .copyright {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .site-footer .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .site-footer .footer-links a {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .site-footer .footer-links a:hover {
+      color: var(--text-primary);
+    }
+
+    @media (max-width: 768px) {
+      .site-footer .footer-inner {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+
+    /* ═══════════════════════════════════════════
+       TOAST
+    ═══════════════════════════════════════════ */
+    .toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--green);
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      opacity: 0;
+      transition: opacity 0.4s, transform 0.4s;
+      z-index: 10000;
+      pointer-events: none;
+      box-shadow: 0 8px 32px rgba(34,197,94,0.3);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
   </style>
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-430F01S574"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-430F01S574');
+  </script>
 </head>
 <body>
 
@@ -778,7 +928,7 @@
     <div class="hero-content">
       <div class="hero-badge reveal">
         <span class="dot"></span>
-        <span>Usado por mais de 2.000 profissionais no Brasil</span>
+        <span>Sistema de agendamento para profissionais</span>
       </div>
       <h1 class="t-display reveal reveal-delay-1">
         Pare de perder clientes<br>por <span class="gradient-text">esquecimento</span>
@@ -815,43 +965,43 @@
     <div class="container">
       <p class="proof-label reveal">Profissionais que já confiam no AgendaPro</p>
       <div class="proof-logos reveal">
-        <span class="proof-logo">Barbearia do Zé</span>
-        <span class="proof-logo">Studio MV</span>
-        <span class="proof-logo">Clínica Sorrident</span>
-        <span class="proof-logo">Personal Fit</span>
-        <span class="proof-logo">Studio Hair</span>
+        <span class="proof-logo">Barbearias</span>
+        <span class="proof-logo">Clínicas</span>
+        <span class="proof-logo">Estúdios</span>
+        <span class="proof-logo">Fitness</span>
+        <span class="proof-logo">Salões</span>
       </div>
       <div class="proof-testimonials">
         <div class="testimonial-card reveal reveal-delay-1">
           <div class="testimonial-stars">★★★★★</div>
-          <p class="testimonial-text">"Antes eu perdia 3 clientes por semana por esquecimento. Agora o WhatsApp lembra automaticamente e minhas faltas caíram pra quase zero."</p>
+          <p class="testimonial-text">"Eu perdia vários clientes por semana porque esqueciam dos horários. Com os lembretes automáticos, minhas faltas caíram quase pra zero."</p>
           <div class="testimonial-author">
-            <div class="testimonial-avatar">Z</div>
+            <div class="testimonial-avatar">C</div>
             <div>
-              <div class="testimonial-name">Zé da Silva</div>
-              <div class="testimonial-role">Barbeiro — Barbearia do Zé</div>
+              <div class="testimonial-name">Carlos M.</div>
+              <div class="testimonial-role">Barbeiro</div>
             </div>
           </div>
         </div>
         <div class="testimonial-card reveal reveal-delay-2">
           <div class="testimonial-stars">★★★★★</div>
-          <p class="testimonial-text">"Meus pacientes agendam pelo link sozinhos. Não preciso mais ficar respondendo WhatsApp o dia todo. Economizo 2h por dia."</p>
+          <p class="testimonial-text">"Meus pacientes agendam pelo link sozinhos, sem precisar ficar respondendo WhatsApp o dia todo. Economizo muito tempo com a agenda."</p>
           <div class="testimonial-author">
-            <div class="testimonial-avatar">M</div>
+            <div class="testimonial-avatar">A</div>
             <div>
-              <div class="testimonial-name">Dra. Marina Costa</div>
-              <div class="testimonial-role">Dentista — Clínica Sorrident</div>
+              <div class="testimonial-name">Ana P.</div>
+              <div class="testimonial-role">Dentista</div>
             </div>
           </div>
         </div>
         <div class="testimonial-card reveal reveal-delay-3">
           <div class="testimonial-stars">★★★★★</div>
-          <p class="testimonial-text">"O painel de relatórios me mostra exatamente quanto estou faturando. Antes eu não sabia nem quantos atendimentos fazia por mês."</p>
+          <p class="testimonial-text">"Agora consigo acompanhar minha receita mensal direto no painel. Antes eu não sabia nem quantos atendimentos fazia por mês."</p>
           <div class="testimonial-author">
-            <div class="testimonial-avatar">R</div>
+            <div class="testimonial-avatar">L</div>
             <div>
-              <div class="testimonial-name">Rafael Oliveira</div>
-              <div class="testimonial-role">Personal Trainer — Personal Fit</div>
+              <div class="testimonial-name">Lucas R.</div>
+              <div class="testimonial-role">Personal Trainer</div>
             </div>
           </div>
         </div>
@@ -1061,6 +1211,21 @@
     </div>
   </section>
 
+  <!-- NEWSLETTER -->
+  <section class="newsletter">
+    <div class="container">
+      <div class="newsletter-header">
+        <p class="t-label reveal">Newsletter</p>
+        <h2 class="t-heading reveal">Fique por dentro</h2>
+        <p class="reveal reveal-delay-1">Receba dicas de gestão e novidades do AgendaPro.</p>
+      </div>
+      <form class="newsletter-form reveal reveal-delay-2" onsubmit="event.preventDefault(); document.getElementById('toast').classList.add('show'); setTimeout(function(){ document.getElementById('toast').classList.remove('show'); }, 3000); this.reset();">
+        <input type="email" placeholder="Seu melhor e-mail" required>
+        <button type="submit" class="btn btn-primary">Inscrever</button>
+      </form>
+    </div>
+  </section>
+
   <!-- FINAL CTA -->
   <section class="final-cta" id="cta">
     <div class="container">
@@ -1080,6 +1245,20 @@
     <span style="font-size: 0.85rem; color: var(--text-secondary);">Teste grátis por 14 dias</span>
     <a href="https://agendapro.vercel.app/login" class="btn btn-primary">Começar Agora</a>
   </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast">Obrigado! Você receberá nossas novidades.</div>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="copyright">&copy; 2026 AgendaPro</span>
+      <div class="footer-links">
+        <a href="termos-de-uso.html">Termos de Uso</a>
+        <a href="politica-de-privacidade.html">Política de Privacidade</a>
+      </div>
+    </div>
+  </footer>
 
   <script>
     // ═══════════════════════════════════════════

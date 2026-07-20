@@ -27,6 +27,9 @@ CREATE TABLE IF NOT EXISTS users (
   role VARCHAR(20) DEFAULT 'owner',
   avatar_url TEXT,
   is_active BOOLEAN DEFAULT true,
+  email_verified BOOLEAN DEFAULT false,
+  email_verification_token VARCHAR(255),
+  email_verification_expires TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://agendapro.vercel.app/sitemap.xml

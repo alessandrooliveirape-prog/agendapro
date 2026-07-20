@@ -13,6 +13,8 @@ Three separate apps in one repo — not a monorepo (no workspace manager, no sha
 | `app/` | Static HTML admin panel (legacy) | — | open `index.html` |
 | `landing/` | Static HTML sales page | — | open `index.html` |
 
+`api/index.js` re-exports the backend Express app as a Vercel serverless function entry point.
+
 Frontend dev server proxies `/api` to `localhost:3000` automatically (`frontend/vite.config.js`).
 
 ## Backend
@@ -25,7 +27,7 @@ Frontend dev server proxies `/api` to `localhost:3000` automatically (`frontend/
 - **Validation**: Zod schemas in route files (e.g. `routes/appointments.js:12`)
 - **Dev runner**: `node --watch` (not nodemon), despite nodemon being in devDependencies
 - **ESM required**: All backend files use `import/export`. Do not use `require()`.
-- **Routes**: auth, business, services, professionals, appointments, clients, public (no auth), webhooks, payments, recurring, reports, subscriptions, pix, admin
+- **Routes**: auth, business, services, professionals, appointments, clients, public (no auth), webhooks, payments, recurring, reports, subscriptions, pix, admin, notifications, units
 
 ## Frontend
 
@@ -34,6 +36,7 @@ Frontend dev server proxies `/api` to `localhost:3000` automatically (`frontend/
 - **Tailwind 4**: Uses `@tailwindcss/vite` plugin. No `tailwind.config.js` — config is done via CSS `@theme` directives in source files.
 - **Auth context**: `frontend/src/contexts/AuthContext.tsx`
 - **Routing**: `react-router-dom` with nested routes under a `Layout` wrapper, ErrorBoundary at root, admin route protected by role check. All routes are in Portuguese (`/agenda`, `/servicos`, `/profissionais`, etc.).
+- **No tsconfig.json**: Frontend relies on Vite's built-in TypeScript defaults.
 
 ## Commands
 
@@ -59,8 +62,8 @@ npm run test:watch            # run tests in watch mode
 
 Both backend and frontend use **Vitest**. Tests run against the in-memory mock database (no real Supabase needed).
 
-- **Backend tests** (`backend/src/__tests__/`): auth routes, services CRUD, appointments CRUD, public routes, mock database query builder
-- **Frontend tests** (`frontend/src/__tests__/`): API client token management, App routing/404/ErrorBoundary, SubscriptionContext
+- **Backend tests** (`backend/src/__tests__/`): auth, services, appointments, clients, public routes, notifications, reports, subscriptions, units, mock database
+- **Frontend tests** (`frontend/src/__tests__/`): API client, App routing/404/ErrorBoundary, SubscriptionContext, BookingPage, ReportsPage, UnitsPage
 - **Test helper** (`backend/src/__tests__/helper.js`): sets `SUPABASE_URL` to placeholder before any imports to force mock mode. Exports `TEST_TOKEN` for authenticated requests.
 
 ## Environment

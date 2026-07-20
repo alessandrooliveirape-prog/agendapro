@@ -10,19 +10,20 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
+// SMTP configuration — uses env vars or defaults to user's email
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: parseInt(process.env.SMTP_PORT || '587'),
   secure: false,
   auth: {
-    user: process.env.SMTP_USER,
+    user: process.env.SMTP_USER || 'agendapro1007@agendapro1007.com.br',
     pass: process.env.SMTP_PASS,
   },
 });
 
 export async function sendEmail(to, subject, html) {
-  if (!process.env.SMTP_USER) {
-    console.log('⚠️ Email não configurado.');
+  if (!process.env.SMTP_PASS) {
+    console.log('⚠️ Email não configurado (SMTP_PASS ausente).');
     console.log(`📧 Para: ${to}`);
     console.log(`📝 Assunto: ${subject}`);
     return { sent: false, reason: 'not_configured' };
@@ -30,7 +31,7 @@ export async function sendEmail(to, subject, html) {
 
   try {
     const info = await transporter.sendMail({
-      from: `"AgendaPro" <${process.env.SMTP_USER}>`,
+      from: `"AgendaPro" <${process.env.SMTP_USER || 'agendapro1007@agendapro1007.com.br'}>`,
       to,
       subject,
       html,
@@ -64,6 +65,38 @@ export function passwordResetEmail(email, resetUrl) {
         </div>
         <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">
           <p>AgendaPro — Sistema de Agendamento</p>
+          <p>Para dúvidas, entre em contato: agendapro1007@agendapro1007.com.br</p>
+        </div>
+      </div>
+    `,
+  };
+}
+
+export function sendVerificationEmail(email, token) {
+  const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const verifyUrl = `${baseUrl}/verificar-email?token=${token}`;
+  return {
+    to: email,
+    subject: 'AgendaPro — Verifique seu email',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #6366f1, #a855f7); padding: 30px; text-align: center;">
+          <h1 style="color: white; margin: 0;">Verifique seu Email</h1>
+        </div>
+        <div style="padding: 30px; background: #f9fafb;">
+          <p>Olá,</p>
+          <p>Obrigado por se cadastrar no AgendaPro! Para ativar sua conta, clique no botão abaixo:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${verifyUrl}" style="background: linear-gradient(135deg, #6366f1, #a855f7); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+              Verificar Meu Email
+            </a>
+          </div>
+          <p style="color: #6b7280; font-size: 14px;">Se você não se cadastrou no AgendaPro, ignore este email.</p>
+          <p style="color: #6b7280; font-size: 14px;">Este link expira em 24 horas.</p>
+        </div>
+        <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">
+          <p>AgendaPro — Sistema de Agendamento</p>
+          <p>Para dúvidas, entre em contato: agendapro1007@agendapro1007.com.br</p>
         </div>
       </div>
     `,
@@ -93,6 +126,7 @@ export function appointmentReminderEmail(appointment) {
         </div>
         <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">
           <p>AgendaPro — Sistema de Agendamento</p>
+          <p>Para dúvidas, entre em contato: agendapro1007@agendapro1007.com.br</p>
         </div>
       </div>
     `,
